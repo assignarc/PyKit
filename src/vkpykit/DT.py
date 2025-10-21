@@ -36,41 +36,44 @@ class DT:
         # predicting using the independent variables
         pred = model.predict(predictors)
 
-        acc = accuracy_score(target, pred)  # to compute Accuracy
+        accuracy = accuracy_score(target, pred)  # to compute Accuracy
         recall = recall_score(target, pred)  # to compute Recall
         precision = precision_score(target, pred)  # to compute Precision
         f1 = f1_score(target, pred)  # to compute F1-score
 
         # creating a dataframe of metrics
         df_perf = pd.DataFrame(
-            {"Accuracy": acc, "Recall": recall, "Precision": precision, "F1": f1,},
+            {"Accuracy": accuracy, "Recall": recall, "Precision": precision, "F1": f1},
             index=[0],
         )
-
         return df_perf
 
     def plot_confusion_matrix(self, 
                               model: DecisionTreeClassifier, 
                               predictors : pd.DataFrame, 
-                              target: pd.Series)-> None: 
+                              target: pd.Series,
+                              x_label : str = 'Predicted', 
+                              y_label : str = 'Actual' )-> None: 
         """
         To plot the confusion_matrix with percentages \n
         model: classifier \n
         predictors: independent variables  \n
         target: dependent variable \n
+        x_label: label for x-axis \n
+        y_label: label for y-axis \n
         return: None
         """
         # Predict the target values using the provided model and predictors
         y_pred = model.predict(predictors)
 
         # Compute the confusion matrix comparing the true target values with the predicted values
-        cm = confusion_matrix(target, y_pred)
+        c_matrix = confusion_matrix(target, y_pred)
 
         # Create labels for each cell in the confusion matrix with both count and percentage
         labels = np.asarray(
             [
-                ["{0:0.0f}".format(item) + "\n{0:.2%}".format(item / cm.flatten().sum())]
-                for item in cm.flatten()
+                ["{0:0.0f}".format(item) + "\n{0:.2%}".format(item / c_matrix.flatten().sum())]
+                for item in c_matrix.flatten()
             ]
         ).reshape(2, 2)    # reshaping to a matrix
 
@@ -78,13 +81,13 @@ class DT:
         plt.figure(figsize=(6, 4))
 
         # Plot the confusion matrix as a heatmap with the labels
-        sns.heatmap(cm, annot=labels, fmt="")
+        sns.heatmap(c_matrix, annot=labels, fmt="")
 
         # Add a label to the y-axis
-        plt.ylabel("True label")
+        plt.ylabel(y_label)
 
         # Add a label to the x-axis
-        plt.xlabel("Predicted label")
+        plt.xlabel(x_label)
 
     def tune_decision_tree(self, 
                            X_train : pd.DataFrame,
@@ -174,6 +177,8 @@ class DT:
             pd.set_option('display.max_rows', None)
             display(estimator_results)
             pd.reset_option('display.max_rows')
+        else:
+            display(estimator_results)
         
         return best_estimator
 
@@ -181,7 +186,10 @@ class DT:
                                 model: DecisionTreeClassifier, 
                                 feature_names: list, 
                                 figsize: tuple[float, float] = (10, 6), 
-                                numberoftopfeatures: int =None) -> None:
+                                numberoftopfeatures: int =None,
+                                feature_title : str = 'Feature Importance',
+                                x_label : str = 'Importance Score',
+                                y_label : str = 'Features') -> None:
         """
         Plot feature importance for a given model and feature names
 
@@ -189,6 +197,9 @@ class DT:
         feature_names: list of feature names    \n
         figsize: size of the figure (default (10,6)) \n
         numberoftopfeatures: number of top features to display (default None, i.e., display all features) \n
+        feature_title: title of the feature importance plot \n
+        x_label: label for x-axis \n
+        y_label: label for y-axis \n
         return: None
         """
         importances = model.feature_importances_
@@ -205,9 +216,9 @@ class DT:
 
         plt.figure(figsize=figsize)
         sns.barplot(x='Importance', y='Feature', data=feature_importance_df, palette='viridis')
-        plt.title('Feature Importance')
-        plt.xlabel('Importance Score')
-        plt.ylabel('Features')
+        plt.title(label=feature_title)
+        plt.xlabel(xlabel=x_label)
+        plt.ylabel(ylabel=y_label)
         plt.show()
 
     
