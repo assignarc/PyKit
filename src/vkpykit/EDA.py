@@ -32,10 +32,10 @@ class EDA:
         """
         count = data[predictor].nunique()
         sorter = data[target].value_counts().index[-1]
-        tab1 = pd.crosstab(data[predictor], data[target], margins=True).sort_values(
+        crosstab = pd.crosstab(data[predictor], data[target], margins=True).sort_values(
             by=sorter, ascending=False
         )
-        print(tab1)
+        print(crosstab)
         print("-" * 120)
         tab = pd.crosstab(data[predictor], data[target], normalize="index").sort_values(
             by=sorter, ascending=False
