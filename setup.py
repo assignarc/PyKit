@@ -2,26 +2,26 @@ from setuptools import setup, find_packages
 
 setup(
     name='VKPyKit',
-    version='0.1.0',
+    version='0.1.2',
+    package_dir={'': 'src'},
+    packages=find_packages('src'),
     description='Packaged functions for ML and Data Science tasks.',
     author='Vishal Khapre',
     author_email='assignarc@gmail.com',
-    packages=find_packages(),
     install_requires=[
         'pandas',
         'numpy',
-        'matplotlib.pyplot',
+        'matplotlib',
         'seaborn',
         'scikit-learn',
-        'IPython.display',
-        'sklearn.tree',
-        'sklearn.metrics',
-        'sklearn.model_selection',
-        'sklearn.preprocessing',
-        'sklearn.tree',
+        'IPython.display'
     ],
     classifiers=[
         'Programming Language :: Python :: 3',
         'Operating System :: OS Independent',
     ],
+    # packages=find_packages(
+    #     where='src',
+    #     include=['VKPyKit'],
+    # ),
 )

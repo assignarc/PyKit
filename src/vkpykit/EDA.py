@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
-
 import pandas as pd
 import numpy as np
 
@@ -32,10 +31,10 @@ class EDA:
         """
         count = data[predictor].nunique()
         sorter = data[target].value_counts().index[-1]
-        crosstab = pd.crosstab(data[predictor], data[target], margins=True).sort_values(
+        tab1 = pd.crosstab(data[predictor], data[target], margins=True).sort_values(
             by=sorter, ascending=False
         )
-        print(crosstab)
+        print(tab1)
         print("-" * 120)
         tab = pd.crosstab(data[predictor], data[target], normalize="index").sort_values(
             by=sorter, ascending=False
@@ -140,4 +139,39 @@ class EDA:
             data[feature].median(), color="black", linestyle="-"
         )  # Add median to the histogram`
 
+    # function to plot a boxplot and a histogram along the same scale.
+    def histogram_boxplot_all(
+            self,
+            data : pd.DataFrame, 
+            features1: list[str] ,
+            figsize : tuple[float, float] =(12, 7), 
+            kde : bool = False) -> None:
+        """
+        Boxplot and histogram combined
+        data: dataframe \n
+        feature: dataframe column \n
+        figsize: size of figure (default (12,7)) \n
+        kde: whether to the show density curve (default False) \n
+        bins: number of bins for histogram (default None) \n
+        return: None
+        """
+        features = data.select_dtypes(include=['number']).columns.tolist()
+
+        plt.figure(figsize=figsize)
+
+        for i, feature in enumerate(features):
+            plt.subplot(3, 3, i+1)    # assign a subplot in the main plot
+            sns.histplot(data=data, x=feature, kde=kde)    # plot the histogram
+        plt.tight_layout()
         plt.show()
+
+        plt.figure(figsize=figsize)
+
+        for i, feature in enumerate(features):
+            plt.subplot(3, 3, i+1)    # assign a subplot in the main plot
+            sns.boxplot(data=data, x=feature)    # plot the histogram
+
+        plt.tight_layout()
+        plt.show()
+    
+  

@@ -1,6 +1,5 @@
+from . import EDA
+from . import DT
 
-from .DT import *
-from .EDA import *
-from .LR import *
-
-__all__ = ["DT", "EDA", "LR"]
+__all__ = [ "EDA", "DT"]
+# AIFunctions.addDT(2, 3)

@@ -9,10 +9,136 @@ from sklearn.metrics import f1_score, accuracy_score, recall_score, precision_sc
 from IPython.display import display
 
 
-class DT:
+class AIFunctions:
 
     def __init__(self):
         pass
+
+    """
+    To plot simple EDA visualizations
+    """
+    # function to plot stacked bar chart
+    def barplot_stacked(self, 
+                        data : pd.DataFrame, 
+                        predictor: str , 
+                        target: str) -> None:
+        """
+        Print the category counts and plot a stacked bar chart
+        data: dataframe \n
+        predictor: independent variable \n
+        target: target variable \n
+        return: None
+        """
+        count = data[predictor].nunique()
+        sorter = data[target].value_counts().index[-1]
+        tab1 = pd.crosstab(data[predictor], data[target], margins=True).sort_values(
+            by=sorter, ascending=False
+        )
+        print(tab1)
+        print("-" * 120)
+        tab = pd.crosstab(data[predictor], data[target], normalize="index").sort_values(
+            by=sorter, ascending=False
+        )
+        tab.plot(kind="bar", stacked=True, figsize=(count + 5, 6))
+        plt.legend(
+            loc="lower left", frameon=False,
+        )
+        plt.legend(loc="upper left", bbox_to_anchor=(1, 1))
+        plt.show()
+
+    # function to create labeled barplot
+    def barplot_labeled(
+            self,
+            data: pd.DataFrame, 
+            feature: str, 
+            percentages: bool =False, 
+            category_levels : int =None):
+        """
+        Barplot with percentage at the top
+
+        data: dataframe \n  
+        feature: dataframe column \n
+        perc: whether to display percentages instead of count (default is False) \n
+        category_levels: displays the top n category levels (default is None, i.e., display all levels) \n
+        return: None
+        """
+
+        total = len(data[feature])  # length of the column
+        count = data[feature].nunique()
+        if category_levels is None:
+            plt.figure(figsize=(count + 2, 6))
+        else:
+            plt.figure(figsize=(category_levels + 2, 6))
+
+        plt.xticks(rotation=90, fontsize=15)
+        ax = sns.countplot(
+            data=data,
+            x=feature,
+            palette="Paired",
+            order=data[feature].value_counts().index[:category_levels] if category_levels else None,
+        )
+
+        for p in ax.patches:
+            if percentages == True:
+                label = "{:.1f}%".format(
+                    100 * p.get_height() / total
+                )  # percentage of each class of the category
+            else:
+                label = p.get_height()  # count of each level of the category
+
+            x = p.get_x() + p.get_width() / 2  # width of the plot
+            y = p.get_height()  # height of the plot
+
+            ax.annotate(
+                label,
+                (x, y),
+                ha="center",
+                va="center",
+                size=12,
+                xytext=(0, 5),
+                textcoords="offset points",
+            )  # annotate the percentage
+
+        plt.show()  # show the plot
+
+    # function to plot a boxplot and a histogram along the same scale.
+    def histogram_boxplot(
+            self,
+            data : pd.DataFrame, 
+            feature: str, 
+            figsize : tuple[float, float] =(12, 7), 
+            kde : bool = False, 
+            bins : int = None) -> None:
+        """
+        Boxplot and histogram combined
+        data: dataframe \n
+        feature: dataframe column \n
+        figsize: size of figure (default (12,7)) \n
+        kde: whether to the show density curve (default False) \n
+        bins: number of bins for histogram (default None) \n
+        return: None
+        """
+        f2, (ax_box2, ax_hist2) = plt.subplots(
+            nrows=2,  # Number of rows of the subplot grid= 2
+            sharex=True,  # x-axis will be shared among all subplots
+            gridspec_kw={"height_ratios": (0.25, 0.75)},
+            figsize=figsize,
+        )  # creating the 2 subplots
+        sns.boxplot(
+            data=data, x=feature, ax=ax_box2, showmeans=True, color="violet"
+        )  # boxplot will be created and a star will indicate the mean value of the column
+        sns.histplot(
+            data=data, x=feature, kde=kde, ax=ax_hist2, bins=bins, palette="winter"
+        ) if bins else sns.histplot(
+            data=data, x=feature, kde=kde, ax=ax_hist2
+        )  # For histogram
+        ax_hist2.axvline(
+            data[feature].mean(), color="green", linestyle="--"
+        )  # Add mean to the histogram
+        ax_hist2.axvline(
+            data[feature].median(), color="black", linestyle="-"
+        )  # Add median to the histogram`
+
 
     """
     Decision Tree Classifier related visualizations
@@ -211,12 +337,11 @@ class DT:
         plt.show()
 
     
-    def visualize_decision_tree(self, 
+    def show_decision_tree_structure(self, 
                                      model: DecisionTreeClassifier, 
-                                     features : list,
-                                     classes : list = None, 
-                                     figsize : tuple[float, float] =(20,10),
-                                     showtext : bool = False) -> None:
+                                     feature_names : list,
+                                     class_names : list = None, 
+                                     figsize : tuple[float, float] =(20,10)) -> None:
         """
         Visualize the structure of the decision tree \n
 
@@ -224,7 +349,6 @@ class DT:
         feature_names: list of feature names \n
         class_names: list of class names \n
         figsize: size of the figure (default (20,10)) \n
-        showtext: whether to show the text report showing the rules of a decision tree (default False) \n
         return: None
         """
         
@@ -234,11 +358,11 @@ class DT:
         # plotting the decision tree
         out = tree.plot_tree(
             model,                         # decision tree classifier model
-            feature_names=features,    # list of feature names (columns) in the dataset
+            feature_names=feature_names,    # list of feature names (columns) in the dataset
             filled=True,                    # fill the nodes with colors based on class
             fontsize=9,                     # font size for the node text
             node_ids=False,                 # do not show the ID of each node
-            class_names=classes,               # whether or not to display class names
+            class_names=class_names,               # whether or not to display class names
         )
 
         # add arrows to the decision tree splits if they are missing
@@ -250,13 +374,3 @@ class DT:
 
         # displaying the plot
         plt.show()
-        
-        if(showtext):
-            # printing a text report showing the rules of a decision tree
-            print(
-                tree.export_text(
-                    model,    # specify the model
-                    feature_names=features,    # specify the feature names
-                    show_weights=True    # specify whether or not to show the weights associated with the model
-                )
-            )
