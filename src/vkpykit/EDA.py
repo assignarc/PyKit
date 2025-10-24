@@ -143,8 +143,8 @@ class EDA:
     def histogram_boxplot_all(
             self,
             data : pd.DataFrame, 
-            features1: list[str] ,
-            figsize : tuple[float, float] =(12, 7), 
+            figsize : tuple[float, float] =(15, 10), 
+            bins : int = 10, 
             kde : bool = False) -> None:
         """
         Boxplot and histogram combined
@@ -161,9 +161,7 @@ class EDA:
 
         for i, feature in enumerate(features):
             plt.subplot(3, 3, i+1)    # assign a subplot in the main plot
-            sns.histplot(data=data, x=feature, kde=kde)    # plot the histogram
-        plt.tight_layout()
-        plt.show()
+            sns.histplot(data=data, x=feature, kde=kde, bins=bins)    # plot the histogram
 
         plt.figure(figsize=figsize)
 
@@ -173,5 +171,55 @@ class EDA:
 
         plt.tight_layout()
         plt.show()
+   
+    def heatmap_all(self, 
+                    data : pd.DataFrame,
+                    features : list = None
+                    ) -> None:
+        """
+        Plot heatmap for all numerical features\n
+        data: dataframe \n
+        return: None
+        """
+        # defining the size of the plot
+        plt.figure(figsize=(12, 7))
+        if features is None:
+            features = data.select_dtypes(include=['number']).columns.tolist()
+
+        # plotting the heatmap for correlation
+        sns.heatmap(
+            data[features].corr(),annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral"
+        )
     
-  
+    def pairplot_all(self, 
+                    data : pd.DataFrame,
+                    features : list[str] = None,
+                    hues: list[str] = None,
+                    min_unique_values_for_pairplot : int = 4,
+                    diag_kind: str = "auto"
+                    ) -> None:
+        """
+        Plot heatmap for all numerical features\n
+        data: dataframe \n
+        features: list of features to plot (default None, i.e., all numerical features) \n
+        hues: list of features to use for coloring (default None, i.e., no coloring) \n
+        min_unique_values_for_pairplot: minimum number of unique values for a feature to be plotted (default 4) \n
+        diag_kind: kind of diagonal plot to use (default "auto") \n
+        return: None
+        """
+        # defining the size of the plot
+        plt.figure(figsize=(12, 7)) 
+
+        if features is None:
+            features = [
+                    col for col in data.columns 
+                    if pd.api.types.is_numeric_dtype(data[col]) and data[col].nunique() > min_unique_values_for_pairplot
+                ]
+            
+        for i, hue in enumerate(hues):
+            #plt.subplot(3, 3, i+1)
+            # plotting the heatmap for correlation
+            print("Hue: " + hue)
+            sns.pairplot(data, vars=features, hue=hue, diag_kind='kde')
+        
+        plt.show()

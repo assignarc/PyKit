@@ -31,13 +31,6 @@ from tests.VK import *
 
 
 
-# %% [markdown]
-# # **Loading the data**
-
-# %%
-# uncomment and run the below code snippets if the dataset is present in the Google Drive
-# from google.colab import drive
-# drive.mount('/content/drive')
 
 # %%
 # loading data into a pandas dataframe
