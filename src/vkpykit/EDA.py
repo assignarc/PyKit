@@ -7,7 +7,9 @@ from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import f1_score, accuracy_score, recall_score, precision_score, confusion_matrix
 from IPython.display import display
-
+# To ignore unnecessary warnings
+import warnings
+warnings.filterwarnings("ignore")   
 
 class EDA:
 
@@ -222,4 +224,73 @@ class EDA:
             print("Hue: " + hue)
             sns.pairplot(data, vars=features, hue=hue, diag_kind='kde')
         
+        plt.show()
+    
+    def boxplot_outliers(self, data: pd.DataFrame):
+        # outlier detection using boxplot
+        """
+        data: dataframe \n
+        return: None
+        """
+        features = data.select_dtypes(include=np.number).columns.tolist()
+
+        plt.figure(figsize=(15, 12))
+
+        for i, feature in enumerate(features):
+            plt.subplot(4, 4, i + 1)
+            plt.boxplot(data[feature], whis=1.5)
+            plt.tight_layout()
+            plt.title(feature)
+
+        plt.show()
+
+    def distribution_plot_for_target(self, 
+                                     data : pd.DataFrame, 
+                                     predictor : str, 
+                                     target : str,
+                                     figsize: tuple[float, float]= (12, 10)
+                                     ) -> None:
+
+        """
+        data: dataframe \n
+        predictor: 
+        """
+        fig, axs = plt.subplots(2, 2, figsize=figsize)
+
+        target_uniq = data[target].unique()
+
+        axs[0, 0].set_title("Distribution of target for target=" + str(target_uniq[0]))
+        sns.histplot(
+            data=data[data[target] == target_uniq[0]],
+            x=predictor,
+            kde=True,
+            ax=axs[0, 0],
+            color="teal",
+            stat="density",
+        )
+
+        axs[0, 1].set_title("Distribution of target for target=" + str(target_uniq[1]))
+        sns.histplot(
+            data=data[data[target] == target_uniq[1]],
+            x=predictor,
+            kde=True,
+            ax=axs[0, 1],
+            color="orange",
+            stat="density",
+        )
+
+        axs[1, 0].set_title("Boxplot w.r.t target")
+        sns.boxplot(data=data, x=target, y=predictor, ax=axs[1, 0], palette="gist_rainbow")
+
+        axs[1, 1].set_title("Boxplot (without outliers) w.r.t target")
+        sns.boxplot(
+            data=data,
+            x=target,
+            y=predictor,
+            ax=axs[1, 1],
+            showfliers=False,
+            palette="gist_rainbow",
+        )
+
+        plt.tight_layout()
         plt.show()

@@ -5,7 +5,7 @@ import numpy as np
 
 from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import f1_score,  accuracy_score, recall_score, precision_score, confusion_matrix, mean_absolute_error, mean_squared_error, r2_score
+from sklearn.metrics import  mean_absolute_error, mean_squared_error, r2_score
 
 
 from IPython.display import display
@@ -14,7 +14,9 @@ from sklearn.model_selection import train_test_split
 
 # to build a linear regression model
 from sklearn.linear_model import LinearRegression
-
+# To ignore unnecessary warnings
+import warnings
+warnings.filterwarnings("ignore")
 
 class LR:
 

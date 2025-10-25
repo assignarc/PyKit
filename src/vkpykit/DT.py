@@ -7,7 +7,9 @@ from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import f1_score, accuracy_score, recall_score, precision_score, confusion_matrix
 from IPython.display import display
-
+# To ignore unnecessary warnings
+import warnings
+warnings.filterwarnings("ignore")
 
 class DT:
 
