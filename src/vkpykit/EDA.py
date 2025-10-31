@@ -217,12 +217,14 @@ class EDA:
                     col for col in data.columns 
                     if pd.api.types.is_numeric_dtype(data[col]) and data[col].nunique() > min_unique_values_for_pairplot
                 ]
-            
-        for i, hue in enumerate(hues):
-            #plt.subplot(3, 3, i+1)
-            # plotting the heatmap for correlation
-            print("Hue: " + hue)
-            sns.pairplot(data, vars=features, hue=hue, diag_kind='kde')
+        if hues is None:
+            sns.pairplot(data, vars=features, diag_kind='kde')
+        else:
+            for i, hue in enumerate(hues):
+                #plt.subplot(3, 3, i+1)
+                # plotting the heatmap for correlation
+                print("Hue: " + hue)
+                sns.pairplot(data, vars=features, hue=hue, diag_kind='kde')
         
         plt.show()
     

@@ -24,7 +24,7 @@ class DT:
     def model_performance_classification(self, 
                                          model : DecisionTreeClassifier, 
                                          predictors : pd.DataFrame, 
-                                         target: pd.Series) -> pd.DataFrame:
+                                         expected: pd.Series) -> pd.DataFrame:
         """
         Function to compute different metrics to check classification model performance
         model: classifier \n
@@ -36,10 +36,10 @@ class DT:
         # predicting using the independent variables
         pred = model.predict(predictors)
 
-        acc = accuracy_score(target, pred)  # to compute Accuracy
-        recall = recall_score(target, pred)  # to compute Recall
-        precision = precision_score(target, pred)  # to compute Precision
-        f1 = f1_score(target, pred)  # to compute F1-score
+        acc = accuracy_score(expected, pred)  # to compute Accuracy
+        recall = recall_score(expected, pred)  # to compute Recall
+        precision = precision_score(expected, pred)  # to compute Precision
+        f1 = f1_score(expected, pred)  # to compute F1-score
 
         # creating a dataframe of metrics
         df_perf = pd.DataFrame(
@@ -52,7 +52,7 @@ class DT:
     def plot_confusion_matrix(self, 
                               model: DecisionTreeClassifier, 
                               predictors : pd.DataFrame, 
-                              target: pd.Series)-> None: 
+                              expected: pd.Series)-> None: 
         """
         To plot the confusion_matrix with percentages \n
         model: classifier \n
@@ -61,16 +61,16 @@ class DT:
         return: None
         """
         # Predict the target values using the provided model and predictors
-        y_pred = model.predict(predictors)
+        predicted = model.predict(predictors)
 
         # Compute the confusion matrix comparing the true target values with the predicted values
-        cm = confusion_matrix(target, y_pred)
+        conf_matrix = confusion_matrix(expected, predicted)
 
         # Create labels for each cell in the confusion matrix with both count and percentage
         labels = np.asarray(
             [
-                ["{0:0.0f}".format(item) + "\n{0:.2%}".format(item / cm.flatten().sum())]
-                for item in cm.flatten()
+                ["{0:0.0f}".format(item) + "\n{0:.2%}".format(item / conf_matrix.flatten().sum())]
+                for item in conf_matrix.flatten()
             ]
         ).reshape(2, 2)    # reshaping to a matrix
 
@@ -78,7 +78,7 @@ class DT:
         plt.figure(figsize=(6, 4))
 
         # Plot the confusion matrix as a heatmap with the labels
-        sns.heatmap(cm, annot=labels, fmt="")
+        sns.heatmap(conf_matrix, annot=labels, fmt="")
 
         # Add a label to the y-axis
         plt.ylabel("True label")
@@ -148,16 +148,16 @@ class DT:
                     # calculate the absolute difference between training and test F1 scores
                     score_diff = abs(train_f1_score - test_f1_score)
 
-                    dtree1_test_perf = self.model_performance_classification(
+                    test_perf = self.model_performance_classification(
                         estimator, X_test, y_test
                     )
-                    estimator_results = pd.concat([estimator_results, pd.DataFrame({'max_depth': [max_depth],
+                    results = pd.concat([results, pd.DataFrame({'max_depth': [max_depth],
                                                                                     'max_leaf_nodes': [max_leaf_nodes],
                                                                                     'min_samples_split': [min_samples_split],
-                                                                                    'Accuracy': dtree1_test_perf['Accuracy'].values,
-                                                                                    'Recall': dtree1_test_perf['Recall'].values,
-                                                                                    'Precision': dtree1_test_perf['Precision'].values,
-                                                                                    'F1': dtree1_test_perf['F1'].values,
+                                                                                    'Accuracy': test_perf['Accuracy'].values,
+                                                                                    'Recall': test_perf['Recall'].values,
+                                                                                    'Precision': test_perf['Precision'].values,
+                                                                                    'F1': test_perf['F1'].values,
                                                                                     'score_diff': [score_diff]
                                                                                 })],
                                                 ignore_index=True)
