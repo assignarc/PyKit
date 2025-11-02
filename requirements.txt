@@ -1,7 +1,7 @@
+statsmodels 
 pandas
 numpy
 matplotlib
 seaborn
 scikit-learn
 ipython
-warnigns

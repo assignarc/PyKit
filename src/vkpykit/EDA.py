@@ -65,7 +65,7 @@ class EDA:
         return: None
         """
 
-        total = len(data[feature])  # length of the column
+        totalfeatures = len(data[feature])  # length of the column
         count = data[feature].nunique()
         if category_levels is None:
             plt.figure(figsize=(count + 2, 6))
@@ -82,9 +82,7 @@ class EDA:
 
         for p in ax.patches:
             if percentages == True:
-                label = "{:.1f}%".format(
-                    100 * p.get_height() / total
-                )  # percentage of each class of the category
+                label = "{:.1f}%".format(100 * p.get_height() / totalfeatures)  # percentage of each class of the category
             else:
                 label = p.get_height()  # count of each level of the category
 
@@ -162,13 +160,13 @@ class EDA:
         plt.figure(figsize=figsize)
 
         for i, feature in enumerate(features):
-            plt.subplot(3, 3, i+1)    # assign a subplot in the main plot
+            plt.subplot(1+int(len(features)/3), 3, i+1)    # assign a subplot in the main plot, 3 columns per row
             sns.histplot(data=data, x=feature, kde=kde, bins=bins)    # plot the histogram
 
         plt.figure(figsize=figsize)
 
         for i, feature in enumerate(features):
-            plt.subplot(3, 3, i+1)    # assign a subplot in the main plot
+            plt.subplot(1+int(len(features)/3), 3, i+1)    # assign a subplot in the main plot
             sns.boxplot(data=data, x=feature)    # plot the histogram
 
         plt.tight_layout()
@@ -221,8 +219,8 @@ class EDA:
             sns.pairplot(data, vars=features, diag_kind='kde')
         else:
             for i, hue in enumerate(hues):
-                #plt.subplot(3, 3, i+1)
-                # plotting the heatmap for correlation
+                plt.subplot(1+int(len(features)/3), 3, i+1) # assign a subplot in the main plot, 3 columns per row
+                #plotting the heatmap for correlation
                 print("Hue: " + hue)
                 sns.pairplot(data, vars=features, hue=hue, diag_kind='kde')
         
@@ -239,7 +237,7 @@ class EDA:
         plt.figure(figsize=(15, 12))
 
         for i, feature in enumerate(features):
-            plt.subplot(4, 4, i + 1)
+            plt.subplot(1+int(len(features)/3), 3, i + 1) # assign a subplot in the main plot, 3 columns per row
             plt.boxplot(data[feature], whis=1.5)
             plt.tight_layout()
             plt.title(feature)
