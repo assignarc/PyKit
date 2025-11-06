@@ -16,6 +16,9 @@ class EDA:
     def __init__(self):
         pass
 
+    RANDOM_STATE = 42
+    NUMBER_OF_DASHES = 100
+
     """
     To plot simple EDA visualizations
     """
@@ -37,7 +40,7 @@ class EDA:
             by=sorter, ascending=False
         )
         print(tab1)
-        print("-" * 120)
+        print("-" * self.NUMBER_OF_DASHES)
         tab = pd.crosstab(data[predictor], data[target], normalize="index").sort_values(
             by=sorter, ascending=False
         )
@@ -60,12 +63,12 @@ class EDA:
 
         data: dataframe \n  
         feature: dataframe column \n
-        perc: whether to display percentages instead of count (default is False) \n
+        percentages: whether to display percentages instead of count (default is False) \n
         category_levels: displays the top n category levels (default is None, i.e., display all levels) \n
         return: None
         """
 
-        totalfeatures = len(data[feature])  # length of the column
+        totalfeaturesvalues = len(data[feature])  # length of the column
         count = data[feature].nunique()
         if category_levels is None:
             plt.figure(figsize=(count + 2, 6))
@@ -82,7 +85,7 @@ class EDA:
 
         for p in ax.patches:
             if percentages == True:
-                label = "{:.1f}%".format(100 * p.get_height() / totalfeatures)  # percentage of each class of the category
+                label = "{:.1f}%".format(100 * p.get_height() / totalfeaturesvalues)  # percentage of each class of the category
             else:
                 label = p.get_height()  # count of each level of the category
 
@@ -114,7 +117,7 @@ class EDA:
         data: dataframe \n
         feature: dataframe column \n
         figsize: size of figure (default (12,7)) \n
-        kde: whether to the show density curve (default False) \n
+        kde: whether to the show 'Kernel Desity Estimate (KDE)' curve (default False) \n
         bins: number of bins for histogram (default None) \n
         return: None
         """
@@ -139,111 +142,7 @@ class EDA:
             data[feature].median(), color="black", linestyle="-"
         )  # Add median to the histogram`
 
-    # function to plot a boxplot and a histogram along the same scale.
-    def histogram_boxplot_all(
-            self,
-            data : pd.DataFrame, 
-            figsize : tuple[float, float] =(15, 10), 
-            bins : int = 10, 
-            kde : bool = False) -> None:
-        """
-        Boxplot and histogram combined
-        data: dataframe \n
-        feature: dataframe column \n
-        figsize: size of figure (default (12,7)) \n
-        kde: whether to the show density curve (default False) \n
-        bins: number of bins for histogram (default None) \n
-        return: None
-        """
-        features = data.select_dtypes(include=['number']).columns.tolist()
-
-        plt.figure(figsize=figsize)
-
-        for i, feature in enumerate(features):
-            plt.subplot(1+int(len(features)/3), 3, i+1)    # assign a subplot in the main plot, 3 columns per row
-            sns.histplot(data=data, x=feature, kde=kde, bins=bins)    # plot the histogram
-
-        plt.figure(figsize=figsize)
-
-        for i, feature in enumerate(features):
-            plt.subplot(1+int(len(features)/3), 3, i+1)    # assign a subplot in the main plot
-            sns.boxplot(data=data, x=feature)    # plot the histogram
-
-        plt.tight_layout()
-        plt.show()
-   
-    def heatmap_all(self, 
-                    data : pd.DataFrame,
-                    features : list = None
-                    ) -> None:
-        """
-        Plot heatmap for all numerical features\n
-        data: dataframe \n
-        return: None
-        """
-        # defining the size of the plot
-        plt.figure(figsize=(12, 7))
-        if features is None:
-            features = data.select_dtypes(include=['number']).columns.tolist()
-
-        # plotting the heatmap for correlation
-        sns.heatmap(
-            data[features].corr(),annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral"
-        )
-    
-    def pairplot_all(self, 
-                    data : pd.DataFrame,
-                    features : list[str] = None,
-                    hues: list[str] = None,
-                    min_unique_values_for_pairplot : int = 4,
-                    diag_kind: str = "auto"
-                    ) -> None:
-        """
-        Plot heatmap for all numerical features\n
-        data: dataframe \n
-        features: list of features to plot (default None, i.e., all numerical features) \n
-        hues: list of features to use for coloring (default None, i.e., no coloring) \n
-        min_unique_values_for_pairplot: minimum number of unique values for a feature to be plotted (default 4) \n
-        diag_kind: kind of diagonal plot to use (default "auto") \n
-        return: None
-        """
-        # defining the size of the plot
-        plt.figure(figsize=(12, 7)) 
-
-        if features is None:
-            features = [
-                    col for col in data.columns 
-                    if pd.api.types.is_numeric_dtype(data[col]) and data[col].nunique() > min_unique_values_for_pairplot
-                ]
-        if hues is None:
-            sns.pairplot(data, vars=features, diag_kind='kde')
-        else:
-            for i, hue in enumerate(hues):
-                plt.subplot(1+int(len(features)/3), 3, i+1) # assign a subplot in the main plot, 3 columns per row
-                #plotting the heatmap for correlation
-                print("Hue: " + hue)
-                sns.pairplot(data, vars=features, hue=hue, diag_kind='kde')
-        
-        plt.show()
-    
-    def boxplot_outliers(self, data: pd.DataFrame):
-        # outlier detection using boxplot
-        """
-        data: dataframe \n
-        return: None
-        """
-        features = data.select_dtypes(include=np.number).columns.tolist()
-
-        plt.figure(figsize=(15, 12))
-
-        for i, feature in enumerate(features):
-            plt.subplot(1+int(len(features)/3), 3, i + 1) # assign a subplot in the main plot, 3 columns per row
-            plt.boxplot(data[feature], whis=1.5)
-            plt.tight_layout()
-            plt.title(feature)
-
-        plt.show()
-
+    # function to plot distribution of target variable for different classes of a predictor
     def distribution_plot_for_target(self, 
                                      data : pd.DataFrame, 
                                      predictor : str, 
@@ -253,7 +152,10 @@ class EDA:
 
         """
         data: dataframe \n
-        predictor: 
+        predictor: Independent variable \n
+        target: Target variable \n
+        figsize: size of the figure (default (12,10)) \n
+        return: None
         """
         fig, axs = plt.subplots(2, 2, figsize=figsize)
 
@@ -294,3 +196,152 @@ class EDA:
 
         plt.tight_layout()
         plt.show()
+
+    # function to plot boxplots for all numerical features to detect outliers
+    def boxplot_outliers(self, 
+                         data: pd.DataFrame):
+        # outlier detection using boxplot
+        """
+        data: dataframe \n
+        return: None
+        """
+        features = data.select_dtypes(include=np.number).columns.tolist()
+
+        plt.figure(figsize=(15, 12))
+
+        for i, feature in enumerate(features):
+            plt.subplot(1+int(len(features)/3), 3, i + 1) # assign a subplot in the main plot, 3 columns per row
+            plt.boxplot(data[feature], whis=1.5)
+            plt.tight_layout()
+            plt.title(feature)
+
+        plt.show()
+
+    # function to plot a boxplot and a histogram along the same scale.
+    def histogram_boxplot_all(
+            self,
+            data : pd.DataFrame, 
+            figsize : tuple[float, float] =(15, 10), 
+            bins : int = 10, 
+            kde : bool = False) -> None:
+        """
+        Boxplot and histogram combined
+        data: dataframe \n
+        feature: dataframe column \n
+        figsize: size of figure (default (15,10)) \n
+        bins: number of bins for histogram (default : 10) \n
+        kde: whether to the display 'Kernel Density Estimate (KDE)' curve (default False) \n
+        return: None
+        """
+        features = data.select_dtypes(include=['number']).columns.tolist()
+
+        plt.figure(figsize=figsize)
+
+        for i, feature in enumerate(features):
+            plt.subplot(1+int(len(features)/3), 3, i+1)    # assign a subplot in the main plot, 3 columns per row
+            sns.histplot(data=data, x=feature, kde=kde, bins=bins)    # plot the histogram
+
+        plt.figure(figsize=figsize)
+
+        for i, feature in enumerate(features):
+            plt.subplot(1+int(len(features)/3), 3, i+1)    # assign a subplot in the main plot
+            sns.boxplot(data=data, x=feature)    # plot the histogram
+
+        plt.tight_layout()
+        plt.show()
+   
+    # function to plot heatmap for all numerical features
+    def heatmap_all(self, 
+                    data : pd.DataFrame,
+                    features : list = None
+                    ) -> None:
+        """
+        Plot heatmap for all numerical features\n
+        data: dataframe \n
+        return: None
+        """
+        # defining the size of the plot
+        plt.figure(figsize=(12, 7))
+        if features is None:
+            features = data.select_dtypes(include=['number']).columns.tolist()
+
+        # plotting the heatmap for correlation
+        sns.heatmap(
+            data[features].corr(),annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral"
+        )
+    
+    # function to plot pairplot for all numerical features
+    def pairplot_all(self, 
+                    data : pd.DataFrame,
+                    features : list[str] = None,
+                    hues: list[str] = None,
+                    min_unique_values_for_pairplot : int = 4,
+                    diagonal_plot_kind: str = "auto"
+                    ) -> None:
+        """
+        Plot heatmap for all numerical features\n
+        data: dataframe \n
+        features: list of features to plot (default None, i.e., all numerical features) \n
+        hues: list of features to use for coloring (default None, i.e., no coloring) \n
+        min_unique_values_for_pairplot: minimum number of unique values for a feature to be plotted (default 4) \n
+        diagonal_plot_kind: kind of diagonal plot to use. default "auto"|possible: auto, hist, kde, None \n
+        return: None
+        """
+        # defining the size of the plot
+        plt.figure(figsize=(12, 7)) 
+
+        if features is None:
+            features = [
+                    col for col in data.columns 
+                    if pd.api.types.is_numeric_dtype(data[col]) and data[col].nunique() > min_unique_values_for_pairplot
+                ]
+        if hues is None:
+            sns.pairplot(data, vars=features, diag_kind=diagonal_plot_kind)
+        else:
+            for i, hue in enumerate(hues):
+                plt.subplot(1+int(len(features)/3), 3, i+1) # assign a subplot in the main plot, 3 columns per row
+                #plotting the heatmap for correlation
+                print("Hue: " + hue)
+                sns.pairplot(data, vars=features, hue=hue, diag_kind=diagonal_plot_kind)
+        
+        plt.show()
+    
+    
+    # function to plot distribution of target variable for different classes of a predictor
+    def distribution_plot_for_target_all(self, 
+                                     data : pd.DataFrame, 
+                                     predictors : list[str], 
+                                     target : str,
+                                     figsize: tuple[float, float]= (12, 10)
+                                     ) -> None:
+
+        """
+        data: dataframe \n
+        predictor: List of Independent variables \n
+        target: Target variable \n  
+        predictor: 
+        """
+        for pred in predictors:
+            print("-" * 100)
+            print(f"Distribution plot_for {target} for predictor:{pred} ")
+            self.distribution_plot_for_target(data, pred, target, figsize)
+
+    # function to plot stacked bar chart for all predictors
+    def barplot_stacked_all(self, 
+                        data : pd.DataFrame, 
+                        predictors: list[str],
+                        target: str
+                        ) -> None:
+
+        """
+        data: dataframe \n
+        predictor: List of Independent variables \n
+        target: Target variable \n  
+        predictor: 
+        """
+        for pred in predictors:
+            if pred == target:
+                continue
+            print("-" * self.NUMBER_OF_DASHES)
+            print(f"Stacked barplot for {target} for predictor:{pred} ")
+            self.barplot_stacked(data, pred, target)

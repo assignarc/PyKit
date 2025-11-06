@@ -11,3 +11,4 @@ src/VKPyKit.egg-info/SOURCES.txt
 src/VKPyKit.egg-info/dependency_links.txt
 src/VKPyKit.egg-info/requires.txt
 src/VKPyKit.egg-info/top_level.txt
+tests/test_EDA.py

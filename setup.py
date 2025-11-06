@@ -14,7 +14,8 @@ setup(
         'matplotlib',
         'seaborn',
         'scikit-learn',
-        'IPython.display'
+        'IPython.display',
+        'plotly.express',
     ],
     classifiers=[
         'Programming Language :: Python :: 3',

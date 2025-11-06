@@ -7,6 +7,7 @@ from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import f1_score, accuracy_score, recall_score, precision_score, confusion_matrix
 from IPython.display import display
+import plotly.express as px
 # To ignore unnecessary warnings
 import warnings
 warnings.filterwarnings("ignore")
@@ -15,7 +16,9 @@ class DT:
 
     def __init__(self):
         pass
-
+    
+    RANDOM_STATE = 42
+    NUMBER_OF_DASHES = 100
     """
     Decision Tree Classifier related visualizations
     To plot the confusion_matrix with percentages
@@ -95,7 +98,8 @@ class DT:
                            max_leaf_nodes_v : tuple[int, int, int]= (10, 51, 10), 
                            min_samples_split_v: tuple[int, int, int]=(10, 51, 10),
                            printall : bool = False,
-                           sortresultby :list = ['score_diff']) -> DecisionTreeClassifier:
+                           sortresultby :list = ['F1Difference'],
+                           sortbyAscending:bool = False) -> DecisionTreeClassifier:
         """
         Function to tune hyperparameters of Decision Tree Classifier \n
         X_train: training independent variables \n
@@ -110,16 +114,16 @@ class DT:
         return: best DecisionTreeClassifier model
         """
 
-
-        # define the parameters of the tree to iterate over - Define by default
+         # define the parameters of the tree to iterate over - Define by default
         max_depth_values = np.arange(max_depth_v[0], max_depth_v[1], max_depth_v[2])
         max_leaf_nodes_values = np.arange(max_leaf_nodes_v[0], max_leaf_nodes_v[1], max_leaf_nodes_v[2])
         min_samples_split_values = np.arange(min_samples_split_v[0], min_samples_split_v[1], min_samples_split_v[2])
 
         # initialize variables to store the best model and its performance
         best_estimator = None
-        best_score_diff = float('inf')
-        estimator_results = pd.DataFrame(columns=['max_depth', 'max_leaf_nodes', 'min_samples_split','Accuracy','Recall','Precision','F1', 'score_diff'])
+        best_scoreF1Difference = float('inf')
+        best_scoreRecallDifference = float('inf')
+        results = pd.DataFrame(columns=['TreeDepth', 'LeafNodes', 'SampleSplit','Accuracy','Recall','Precision','F1', 'F1Difference','RecallDifference'])
 
         # iterate over all combinations of the specified parameter values
         for max_depth in max_depth_values:
@@ -131,7 +135,7 @@ class DT:
                         max_depth=max_depth,
                         max_leaf_nodes=max_leaf_nodes,
                         min_samples_split=min_samples_split,
-                        random_state=42
+                        random_state=self.RANDOM_STATE
                     )
 
                     # fit the model to the training data
@@ -144,44 +148,65 @@ class DT:
                     # calculate F1 scores for training and test sets
                     train_f1_score = f1_score(y_train, y_train_pred)
                     test_f1_score = f1_score(y_test, y_test_pred)
-
                     # calculate the absolute difference between training and test F1 scores
-                    score_diff = abs(train_f1_score - test_f1_score)
+                    scoreF1Difference = abs(train_f1_score - test_f1_score)
 
-                    test_perf = self.model_performance_classification(
+                     # Calculate recall scores for training and test sets
+                    train_recall_score = recall_score(y_train, y_train_pred)
+                    test_recall_score = recall_score(y_test, y_test_pred)
+                    # Calculate the absolute difference between training and test recall scores
+                    scoreRecallDifference = abs(train_recall_score - test_recall_score)
+
+                    test_performance = self.model_performance_classification(
                         estimator, X_test, y_test
                     )
-                    results = pd.concat([results, pd.DataFrame({'max_depth': [max_depth],
-                                                                                    'max_leaf_nodes': [max_leaf_nodes],
-                                                                                    'min_samples_split': [min_samples_split],
-                                                                                    'Accuracy': test_perf['Accuracy'].values,
-                                                                                    'Recall': test_perf['Recall'].values,
-                                                                                    'Precision': test_perf['Precision'].values,
-                                                                                    'F1': test_perf['F1'].values,
-                                                                                    'score_diff': [score_diff]
-                                                                                })],
-                                                ignore_index=True)
+                    
+                    results = pd.concat([results, 
+                                        pd.DataFrame({'TreeDepth': [max_depth],
+                                                    'LeafNodes': [max_leaf_nodes],
+                                                    'SampleSplit': [min_samples_split],
+                                                    'Accuracy': test_performance['Accuracy'].values,
+                                                    'Recall': test_performance['Recall'].values,
+                                                    'Precision': test_performance['Precision'].values,
+                                                    'F1': test_performance['F1'].values,
+                                                    'F1Difference': [scoreF1Difference],
+                                                    'RecallDifference': [scoreRecallDifference]
+                                                    })],
+                                        ignore_index=True)
                 
                     # update the best estimator and best score if the current one has a smaller score difference
-                    if score_diff < best_score_diff:
-                        best_score_diff = score_diff
+                    if (scoreF1Difference < best_scoreF1Difference):
+                        best_scoreF1Difference = scoreF1Difference
+                        best_scoreRecallDifference = scoreRecallDifference
                         best_estimator = estimator
 
-        estimator_results.sort_values(by=sortresultby, ascending=True, inplace=True)
-        # Set display option to show all rows
+        
+        results.sort_values(by=sortresultby, ascending=sortbyAscending, inplace=True)
 
+        best_results = pd.DataFrame({
+            'TreeDepth': [best_estimator.get_params()['max_depth']],
+            'LeafNodes': [best_estimator.get_params()['max_leaf_nodes']],
+            'SampleSplit': [best_estimator.get_params()['min_samples_split']],
+            'F1Difference': [best_scoreF1Difference],
+            'RecallDifference': [best_scoreRecallDifference]
+        })
+        print("-" * self.NUMBER_OF_DASHES)  
+        display(best_results)
+        print("-" * self.NUMBER_OF_DASHES)  
+        # Set display option to show all rows
+       
         if printall:
             pd.set_option('display.max_rows', None)
-            display(estimator_results)
+            display(results) 
             pd.reset_option('display.max_rows')
         else:
-            display(estimator_results)
+            display(results)
         
         return best_estimator
 
     def plot_feature_importance(self, 
                                 model: DecisionTreeClassifier, 
-                                feature_names: list, 
+                                features: list, 
                                 figsize: tuple[float, float] = (10, 6), 
                                 numberoftopfeatures: int =None) -> None:
         """
@@ -193,21 +218,21 @@ class DT:
         numberoftopfeatures: number of top features to display (default None, i.e., display all features) \n
         return: None
         """
-        importances = model.feature_importances_
 
-        feature_importance_df = pd.DataFrame({
-            'Feature': feature_names,
-            'Importance': importances
-        })
+        df_importance = pd.DataFrame({
+            'Feature': features,
+            'Importance': model.feature_importances_
+        }).sort_values(by='Importance', ascending=False)
 
-        feature_importance_df.sort_values(by='Importance', ascending=False, inplace=True)
 
         if numberoftopfeatures:
-            feature_importance_df = feature_importance_df.head(numberoftopfeatures)
+            df_importance.head(numberoftopfeatures, inplace=True)
+
+        display(df_importance)
 
         plt.figure(figsize=figsize)
-        sns.barplot(x='Importance', y='Feature', data=feature_importance_df, palette='viridis')
-        plt.title('Feature Importance')
+        sns.barplot(x='Importance', y='Feature', data=df_importance, palette='viridis')
+        plt.title('Feature and their Importance Scores')
         plt.xlabel('Importance Score')
         plt.ylabel('Features')
         plt.show()
@@ -218,7 +243,8 @@ class DT:
                                      features : list,
                                      classes : list = None, 
                                      figsize : tuple[float, float] =(20,10),
-                                     showtext : bool = False) -> None:
+                                     showtext : bool = False,
+                                     showimportance: bool = False) -> None:
         """
         Visualize the structure of the decision tree \n
 
@@ -227,6 +253,7 @@ class DT:
         class_names: list of class names \n
         figsize: size of the figure (default (20,10)) \n
         showtext: whether to show the text report showing the rules of a decision tree (default False) \n
+        shiwImportance: whether to show feature importance (default False) \n
         return: None
         """
         
@@ -254,6 +281,7 @@ class DT:
         plt.show()
         
         if(showtext):
+            print("*"*self.NUMBER_OF_DASHES)
             # printing a text report showing the rules of a decision tree
             print(
                 tree.export_text(
@@ -262,3 +290,8 @@ class DT:
                     show_weights=True    # specify whether or not to show the weights associated with the model
                 )
             )
+        if(showimportance):
+            print("*"*self.NUMBER_OF_DASHES)
+            self.plot_feature_importance(model, features=features)
+           
+          
