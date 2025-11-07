@@ -1,2 +1,7 @@
 dist
 src/VKPyKit.edgg*
+src/vkpykit/__pycache__/
+src/vkpykit/*.pyc
+tests/__pycache__/
+tests/*.pyc
+.vscode/
