@@ -6,14 +6,14 @@ import numpy as np
 from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import  mean_absolute_error, mean_squared_error, r2_score
-
-
-from IPython.display import display
 # to split the data into train and test sets
 from sklearn.model_selection import train_test_split
-
 # to build a linear regression model
 from sklearn.linear_model import LinearRegression
+
+from IPython.display import display, HTML
+
+
 # To ignore unnecessary warnings
 import warnings
 warnings.filterwarnings("ignore")

@@ -6,7 +6,7 @@ import numpy as np
 from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import f1_score, accuracy_score, recall_score, precision_score, confusion_matrix
-from IPython.display import display
+from IPython.display import display, HTML
 import plotly.express as px
 # To ignore unnecessary warnings
 import warnings
@@ -27,7 +27,9 @@ class DT:
     def model_performance_classification(self, 
                                          model : DecisionTreeClassifier, 
                                          predictors : pd.DataFrame, 
-                                         expected: pd.Series) -> pd.DataFrame:
+                                         expected: pd.Series,
+                                         printall :bool = False,
+                                         title: str = 'DecisionTreeClassifier') -> pd.DataFrame:
         """
         Function to compute different metrics to check classification model performance
         model: classifier \n
@@ -46,16 +48,20 @@ class DT:
 
         # creating a dataframe of metrics
         df_perf = pd.DataFrame(
-            {"Accuracy": acc, "Recall": recall, "Precision": precision, "F1": f1,},
-            index=[0],
+                {"Accuracy": acc, "Recall": recall, "Precision": precision, "F1": f1,},
+                index=[0],
         )
+        if(printall):
+            display(HTML("<h3>Classification Model Performance Metrics : "+ title+"}</h3>"))
+            display(df_perf)
 
         return df_perf
 
     def plot_confusion_matrix(self, 
                               model: DecisionTreeClassifier, 
                               predictors : pd.DataFrame, 
-                              expected: pd.Series)-> None: 
+                              expected: pd.Series,
+                              title : str = "DecisionTreeClassifier")-> None: 
         """
         To plot the confusion_matrix with percentages \n
         model: classifier \n
@@ -79,7 +85,7 @@ class DT:
 
         # Set the figure size for the plot
         plt.figure(figsize=(6, 4))
-
+        plt.title("Confusion Matrix for " + title)
         # Plot the confusion matrix as a heatmap with the labels
         sns.heatmap(conf_matrix, annot=labels, fmt="")
 
@@ -157,9 +163,12 @@ class DT:
                     # Calculate the absolute difference between training and test recall scores
                     scoreRecallDifference = abs(train_recall_score - test_recall_score)
 
-                    test_performance = self.model_performance_classification(
-                        estimator, X_test, y_test
-                    )
+                    test_performance = self.model_performance_classification(model=estimator,
+                                                                             predictors= X_test, 
+                                                                             expected=y_test, 
+                                                                             title="DecisionTreeClassifier", 
+                                                                             printall=False
+                                                                     )
                     
                     results = pd.concat([results, 
                                         pd.DataFrame({'TreeDepth': [max_depth],
@@ -208,7 +217,8 @@ class DT:
                                 model: DecisionTreeClassifier, 
                                 features: list, 
                                 figsize: tuple[float, float] = (10, 6), 
-                                numberoftopfeatures: int =None) -> None:
+                                numberoftopfeatures: int =None,
+                                title: str = '') -> None:
         """
         Plot feature importance for a given model and feature names
 
@@ -232,12 +242,11 @@ class DT:
 
         plt.figure(figsize=figsize)
         sns.barplot(x='Importance', y='Feature', data=df_importance, palette='viridis')
-        plt.title('Feature and their Importance Scores')
+        plt.title('Feature and their Importance Scores : ' + title)
         plt.xlabel('Importance Score')
         plt.ylabel('Features')
         plt.show()
 
-    
     def visualize_decision_tree(self, 
                                      model: DecisionTreeClassifier, 
                                      features : list,
@@ -293,5 +302,253 @@ class DT:
         if(showimportance):
             print("*"*self.NUMBER_OF_DASHES)
             self.plot_feature_importance(model, features=features)
-           
+    
+    def prepruning_nodes_samples_split(self,
+                                    X_train: pd.DataFrame,
+                                    y_train: pd.Series,
+                                    X_test: pd.DataFrame,
+                                    y_test: pd.Series,
+                                    max_depth_v=(2,9,2),
+                                    max_leaf_nodes_v=(50,250,50),
+                                    min_samples_split_v=(10,70,10),
+                                    printall=True,
+                                    sortresultby="F1",
+                                    sortbyAscending=False) -> dict:
+        """
+        Function to perform pre-pruning on Decision Tree Classifier \n
+        X_train: training independent variables \n
+        y_train: training dependent variable \n
+        X_test: test independent variables \n  
+        y_test: test dependent variable \n  
+        max_depth_v: tuple containing (start, end, step) values for max_depth parameter \n
+        max_leaf_nodes_v: tuple containing (start, end, step) values for max_leaf_nodes parameter \n
+        min_samples_split_v: tuple containing (start, end, step) values for min_samples_split parameter \n
+        printall: whether to print all results (default is True) \n
+        sortresultby: column to sort the results by (default is 'F1') \n
+        return: dictionary containing the pre-pruned model and its performance metrics
+        """
+
+        model_prepruning = self.tune_decision_tree(X_train=X_train,
+                                                   y_train=y_train,
+                                                   X_test=X_test,
+                                                   y_test=y_test,
+                                                   max_depth_v=max_depth_v,
+                                                   max_leaf_nodes_v=max_leaf_nodes_v,
+                                                   min_samples_split_v=min_samples_split_v,
+                                                   printall=printall,
+                                                   sortresultby=[sortresultby],
+                                                   sortbyAscending=sortbyAscending)
+        
+        model_prepruning = model_prepruning.fit(X=X_train,y=y_train) 
+
+        features = list(X_train.columns)
+
+        if(printall):
+            self.visualize_decision_tree(model=model_prepruning,
+                                         features=features,
+                                         classes=None,
+                                         figsize=(20,20),
+                                         showtext=True,
+                                         showimportance=True)
+        
+        model_prepruning_train_perf = self.model_performance_classification(model=model_prepruning,predictors=X_train,expected=y_train)
           
+        if(printall): 
+            display(HTML("<h3>Pre-pruning on Training Set</h3>"))
+            self.plot_confusion_matrix(model=model_prepruning,predictors=X_test,expected=y_test, title="Pre-pruning on Test Set")
+            display(model_prepruning_train_perf)
+
+        model_prepruning_test_perf = self.model_performance_classification(model=model_prepruning,predictors=X_test,expected=y_test)
+
+        if(printall):
+            display(HTML("<h3>Pre-pruning on Test Set</h3>"))
+            self.plot_confusion_matrix(model=model_prepruning,predictors= X_test,expected= y_test, title="Pre-pruning on Test Set")
+            display(model_prepruning_test_perf)
+
+        return {
+                'model': model_prepruning,
+                'prepruning_train_perf': model_prepruning_train_perf, 
+                'prepruning_test_perf': model_prepruning_test_perf,
+                #Fix the tune_decision_tree to return these values
+                # 'model_default_perf' : model_default_perf,
+                # 'train_f1_scores': train_f1_scores,
+                # 'test_f1_scores': test_f1_scores,
+        }
+           
+    def postpruning_cost_complexity(self,
+                                   X_train: pd.DataFrame,
+                                   y_train: pd.Series,
+                                   X_test: pd.DataFrame,
+                                   y_test: pd.Series,
+                                   printall: bool = True,
+                                   figsize: tuple[float, float] = (10, 6)) -> dict:
+        """
+        Plot cost complexity pruning path and accuracy vs alpha for training and testing sets \n
+        X_train: training independent variables \n
+        y_train: training dependent variable \n
+        X_test: test independent variables \n  
+        y_test: test dependent variable \n
+        printall: whether to print all results (default is True) \n
+        figsize: size of the figure (default (10,6)) \n
+        return: None
+        """
+        # Create an instance of the decision tree model
+        decisionTreeClassifier = DecisionTreeClassifier(random_state=self.RANDOM_STATE)
+
+        # Compute the cost complexity pruning path for the model using the training data
+        path = decisionTreeClassifier.cost_complexity_pruning_path(X_train, y_train)
+
+        # Extract the array of effective alphas from the pruning path,  Extract the array of total impurities at each alpha along the pruning path
+        ccp_alphas, impurities = path.ccp_alphas, path.impurities
+
+       
+        if(printall):
+            display(HTML("<h3>Effective alphas and corresponding total impurities</h3>"))
+            display(pd.DataFrame({'ccp_alphas': ccp_alphas, 'impurities': impurities}))
+
+            # Create a figure
+            fig, ax = plt.subplots(figsize=figsize)
+
+            # Plot the total impurities versus effective alphas, excluding the last value,
+            # using markers at each data point and connecting them with steps
+            ax.plot(ccp_alphas[:-1], impurities[:-1], marker="o", drawstyle="steps-post")
+
+            # Set the x-axis label
+            ax.set_xlabel("Effective Alpha")
+
+            # Set the y-axis label
+            ax.set_ylabel("Total impurity of leaves")
+
+            # Set the title of the plot
+            ax.set_title("Total Impurity vs Effective Alpha for training set");
+
+
+        #Initialize an empty list to store the decision tree classifiers
+        decisionTreeClassifiers = []
+
+        # Iterate over each ccp_alpha value extracted from cost complexity pruning path
+        for ccp_alpha in ccp_alphas:
+            # Create an instance of the DecisionTreeClassifier
+            decisionTreeClassifier = DecisionTreeClassifier(ccp_alpha=ccp_alpha, random_state=self.RANDOM_STATE)
+
+            # Fit the classifier to the training data
+            decisionTreeClassifier.fit(X_train, y_train)
+
+            # Append the trained classifier to the list
+            decisionTreeClassifiers.append(decisionTreeClassifier)
+        if(printall):
+            # Print the number of nodes in the last tree along with its ccp_alpha value
+            display(HTML("<b>Number of nodes in the last tree is {} with ccp_alpha {}</b>".format(decisionTreeClassifiers[-1].tree_.node_count, ccp_alphas[-1])))
+
+        # Remove the last classifier and corresponding ccp_alpha value from the lists
+        decisionTreeClassifiers = decisionTreeClassifiers[:-1]
+        ccp_alphas = ccp_alphas[:-1]
+
+        # Extract the number of nodes in each tree classifier
+        node_counts = [decisionTreeClassifier.tree_.node_count for decisionTreeClassifier in decisionTreeClassifiers]
+
+        # Extract the maximum depth of each tree classifier
+        depth = [decisionTreeClassifier.tree_.max_depth for decisionTreeClassifier in decisionTreeClassifiers]
+
+        # Create a figure and a set of subplots
+        fig, ax = plt.subplots(2, 1, figsize=figsize)
+
+        # Plot the number of nodes versus ccp_alphas on the first subplot
+        ax[0].plot(ccp_alphas, node_counts, marker="o", drawstyle="steps-post")
+        ax[0].set_xlabel("Alpha")
+        ax[0].set_ylabel("Number of nodes")
+        ax[0].set_title("Number of nodes vs Alpha")
+
+        # Plot the depth of tree versus ccp_alphas on the second subplot
+        ax[1].plot(ccp_alphas, depth, marker="o", drawstyle="steps-post")
+        ax[1].set_xlabel("Alpha")
+        ax[1].set_ylabel("Depth of tree")
+        ax[1].set_title("Depth vs Alpha")
+
+        # Adjust the layout of the subplots to avoid overlap
+        fig.tight_layout()
+
+        # Initialize an empty list to store F1 scores for training set for each decision tree classifier
+        train_f1_scores = []  
+
+        # Iterate through each decision tree classifier in 'decisionTreeClassifiers'
+        for decisionTreeClassifier in decisionTreeClassifiers:
+            # Predict labels for the training set using the current decision tree classifier
+            pred_train = decisionTreeClassifier.predict(X_train)
+
+            # Calculate the F1 score for the training set predictions compared to true labels
+            f1_train = f1_score(y_train, pred_train)
+
+            # Append the calculated F1 score to the train_f1_scores list
+            train_f1_scores.append(f1_train)
+
+        # Initialize an empty list to store F1 scores for test set for each decision tree classifier
+        test_f1_scores = []  
+
+        # Iterate through each decision tree classifier in 'decisionTreeClassifiers'
+        for decisionTreeClassifier in decisionTreeClassifiers:
+            # Predict labels for the test set using the current decision tree classifier
+            pred_test = decisionTreeClassifier.predict(X_test)
+
+            # Calculate the F1 score for the test set predictions compared to true labels
+            f1_test = f1_score(y_test, pred_test)
+
+            # Append the calculated F1 score to the test_f1_scores list
+            test_f1_scores.append(f1_test)
+
+        if(printall):
+            # Create a figure
+            fig, ax = plt.subplots(figsize=figsize)
+            ax.set_xlabel("Alpha")  # Set the label for the x-axis
+            ax.set_ylabel("F1 Score")  # Set the label for the y-axis
+            ax.set_title("F1 Score vs Alpha for training and test sets")  # Set the title of the plot
+
+            # Plot the training F1 scores against alpha, using circles as markers and steps-post style
+            ax.plot(ccp_alphas, train_f1_scores, marker="o", label="training", drawstyle="steps-post")
+
+            # Plot the testing F1 scores against alpha, using circles as markers and steps-post style
+            ax.plot(ccp_alphas, test_f1_scores, marker="o", label="test", drawstyle="steps-post")
+
+            # Add a legend to the plot
+            ax.legend();  
+
+        # creating the model where we get highest test F1 Score
+        index_best_model = np.argmax(test_f1_scores)
+
+        # selcting the decision tree model corresponding to the highest test score
+        model_postpruning = decisionTreeClassifiers[index_best_model]
+
+        if(printall):
+            display(model_postpruning)
+            self.plot_confusion_matrix(model=model_postpruning, 
+                                       predictors=X_train,
+                                       expected=y_train, 
+                                       title="Post-pruning on Training Set")
+
+        model_postpruning_train_perf = self.model_performance_classification(model=model_postpruning,
+                                                                             predictors= X_train,
+                                                                             expected= y_train,
+                                                                             title="Post-pruning on Training Set")
+        if(printall):
+            display(model_postpruning_train_perf)
+            self.plot_confusion_matrix(model=model_postpruning,predictors= X_test,expected= y_test, title="Post-pruning on Test Set")
+            
+        model_postpruning_test_perf = self.model_performance_classification(model=model_postpruning,
+                                                                            predictors= X_test, 
+                                                                            expected= y_test,
+                                                                            title="Post-pruning on Test Set")
+
+        if(printall):
+            display(model_postpruning_test_perf)
+        if(printall):
+            self.visualize_decision_tree(model=model_postpruning,features=X_train.columns,classes=None,figsize=(20,20),showtext=True,showimportance=True)
+
+        return {
+                'model': model_postpruning,
+                'postpruning_train_perf': model_postpruning_train_perf, 
+                'postpruning_test_perf': model_postpruning_test_perf,
+                'train_f1_scores': train_f1_scores,
+                'test_f1_scores': test_f1_scores,
+                'ccp_alphas': ccp_alphas, 
+                'impurities': impurities 
+        }
