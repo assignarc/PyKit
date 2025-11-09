@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import numpy as np
+import sys
 
 from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier
@@ -52,10 +53,12 @@ class DT:
                 index=[0],
         )
         if(printall):
-            display(HTML("<h3>Classification Model Performance Metrics : "+ title+"}</h3>"))
+            display(HTML(f"<h3>Classification Model Performance Metrics : {title}</h3>"))
             display(df_perf)
 
         return df_perf
+    
+        # END OF MODEL PERFORMANCE CLASSIFICATION FUNCTION
 
     def plot_confusion_matrix(self, 
                               model: DecisionTreeClassifier, 
@@ -94,6 +97,9 @@ class DT:
 
         # Add a label to the x-axis
         plt.xlabel("Predicted label")
+        plt.show()
+        sys.stdout.flush()
+        # END OF PLOT CONFUSION MATRIX FUNCTION
 
     def tune_decision_tree(self, 
                            X_train : pd.DataFrame,
@@ -103,7 +109,7 @@ class DT:
                            max_depth_v : tuple[int, int, int] = (2,11,2), 
                            max_leaf_nodes_v : tuple[int, int, int]= (10, 51, 10), 
                            min_samples_split_v: tuple[int, int, int]=(10, 51, 10),
-                           printall : bool = False,
+                           printall : bool = True,
                            sortresultby :list = ['F1Difference'],
                            sortbyAscending:bool = False) -> DecisionTreeClassifier:
         """
@@ -213,6 +219,143 @@ class DT:
         
         return best_estimator
 
+        # END OF TUNE DECISION TREE FUNCTION
+
+    
+    
+    def tune_decision_tree_results(self, 
+                           X_train : pd.DataFrame,
+                           y_train : pd.Series, 
+                           X_test : pd.DataFrame, 
+                           y_test : pd.Series,
+                           max_depth_v : tuple[int, int, int] = (2,11,2), 
+                           max_leaf_nodes_v : tuple[int, int, int]= (10, 51, 10), 
+                           min_samples_split_v: tuple[int, int, int]=(10, 51, 10),
+                           printall : bool = False,
+                           sortresultby :list = ['F1Difference'],
+                           sortbyAscending:bool = False,
+                           metrictooptimize: str = 'F1Difference'
+                           ) -> dict:
+        """
+        Function to tune hyperparameters of Decision Tree Classifier \n
+        X_train: training independent variables \n
+        y_train: training dependent variable \n
+        X_test: test independent variables \n  
+        y_test: test dependent variable
+        max_depth_v: tuple containing (start, end, step) values for max_depth parameter \n
+        max_leaf_nodes_v: tuple containing (start, end, step) values for max_leaf_nodes parameter \n
+        min_samples_split_v: tuple containing (start, end, step) values for min_samples_split parameter \n
+        printall: whether to print all results (default is False) \n
+        sortresultby: list of columns to sort the results by (default is ['score_diff']) \n
+        metrictooptimize: metric to optimize (default is 'F1Difference') | possible values: 'Accuracy', 'Recall', 'Precision', F1Difference', 'RecallDifference' \n
+        return: dictionary containing the scores dataframe, tuned model scores dataframe, and the best DecisionTreeClassifier model
+        """
+        # Metric Column Indices
+        metric = {
+                'Accuracy': 3 ,
+                'Recall': 4 ,
+                'Precision': 5,
+                'F1': 6,
+                'F1Difference': 7,
+                'RecallDifference': 8 }[metrictooptimize]
+
+         # define the parameters of the tree to iterate over - Define by default
+        max_depth_values = np.arange(max_depth_v[0], max_depth_v[1], max_depth_v[2])
+        max_leaf_nodes_values = np.arange(max_leaf_nodes_v[0], max_leaf_nodes_v[1], max_leaf_nodes_v[2])
+        min_samples_split_values = np.arange(min_samples_split_v[0], min_samples_split_v[1], min_samples_split_v[2])
+
+        # initialize variables to store the best model and its performance
+        best_estimator = None
+        best_scoreF1Difference = float('inf')
+        best_scoreRecallDifference = float('inf')
+        scores = pd.DataFrame(columns=['TreeDepth', 'LeafNodes', 'SampleSplit','Accuracy','Recall','Precision','F1', 'F1Difference','RecallDifference'])
+
+        # iterate over all combinations of the specified parameter values
+        for max_depth in max_depth_values:
+            for max_leaf_nodes in max_leaf_nodes_values:
+                for min_samples_split in min_samples_split_values:
+
+                    # initialize the tree with the current set of parameters
+                    estimator = DecisionTreeClassifier(
+                        max_depth=max_depth,
+                        max_leaf_nodes=max_leaf_nodes,
+                        min_samples_split=min_samples_split,
+                        random_state=self.RANDOM_STATE
+                    )
+
+                    # fit the model to the training data
+                    estimator.fit(X_train, y_train)
+
+                    # make predictions on the training and test sets
+                    y_train_pred = estimator.predict(X_train)
+                    y_test_pred = estimator.predict(X_test)
+
+                    # calculate F1 scores for training and test sets
+                    train_f1_score = f1_score(y_train, y_train_pred)
+                    test_f1_score = f1_score(y_test, y_test_pred)
+                    # calculate the absolute difference between training and test F1 scores
+                    scoreF1Difference = abs(train_f1_score - test_f1_score)
+
+                     # Calculate recall scores for training and test sets
+                    train_recall_score = recall_score(y_train, y_train_pred)
+                    test_recall_score = recall_score(y_test, y_test_pred)
+                    # Calculate the absolute difference between training and test recall scores
+                    scoreRecallDifference = abs(train_recall_score - test_recall_score)
+
+                    test_performance = self.model_performance_classification(model=estimator,
+                                                                             predictors= X_test, 
+                                                                             expected=y_test, 
+                                                                             title="DecisionTreeClassifier", 
+                                                                             printall=False
+                                                                     )
+                    score =  pd.DataFrame({'TreeDepth': [max_depth],
+                                                    'LeafNodes': [max_leaf_nodes],
+                                                    'SampleSplit': [min_samples_split],
+                                                    'Accuracy': test_performance['Accuracy'].values,
+                                                    'Recall': test_performance['Recall'].values,
+                                                    'Precision': test_performance['Precision'].values,
+                                                    'F1': test_performance['F1'].values,
+                                                    'F1Difference': [scoreF1Difference],
+                                                    'RecallDifference': [scoreRecallDifference]})
+                    
+                    scores = pd.concat([scores, score],ignore_index=True)
+                
+                    # update the best estimator and best score if the current one has a smaller score difference
+                    if (score[metric] < best_score[metric]):
+                        best_score = score
+                        best_estimator = estimator
+
+        
+        scores.sort_values(by=sortresultby, ascending=sortbyAscending, inplace=True)
+
+        tuned_model_scores = pd.DataFrame({
+            'TreeDepth': [best_estimator.get_params()['max_depth']],
+            'LeafNodes': [best_estimator.get_params()['max_leaf_nodes']],
+            'SampleSplit': [best_estimator.get_params()['min_samples_split']],
+            'F1Difference': [best_scoreF1Difference],
+            'RecallDifference': [best_scoreRecallDifference]
+        })
+        
+        
+
+        if(printall):
+            print("-" * self.NUMBER_OF_DASHES)  
+            display(tuned_model_scores)
+            print("-" * self.NUMBER_OF_DASHES)  
+            # Set display option to show all rows
+            pd.set_option('display.max_rows', None)
+            display(scores) 
+            pd.reset_option('display.max_rows')
+       
+
+        return {
+                'scores': scores,
+                'tuned_model_scores': tuned_model_scores,
+                'model': best_estimator
+        }
+    
+        # END OF TUNE DECISION TREE FUNCTION
+    
     def plot_feature_importance(self, 
                                 model: DecisionTreeClassifier, 
                                 features: list, 
@@ -246,6 +389,9 @@ class DT:
         plt.xlabel('Importance Score')
         plt.ylabel('Features')
         plt.show()
+        sys.stdout.flush()
+
+        # END OF PLOT FEATURE IMPORTANCE FUNCTION
 
     def visualize_decision_tree(self, 
                                      model: DecisionTreeClassifier, 
@@ -266,6 +412,7 @@ class DT:
         return: None
         """
         
+        display(HTML("<h2>Visualizing Decision Tree</h2>"))
         # set the figure size for the plot
         plt.figure(figsize=figsize)
 
@@ -288,9 +435,10 @@ class DT:
 
         # displaying the plot
         plt.show()
+        sys.stdout.flush()
         
         if(showtext):
-            print("*"*self.NUMBER_OF_DASHES)
+            display(HTML("<h3>Text depiction of the Decision Tree</h3>"))
             # printing a text report showing the rules of a decision tree
             print(
                 tree.export_text(
@@ -299,9 +447,16 @@ class DT:
                     show_weights=True    # specify whether or not to show the weights associated with the model
                 )
             )
-        if(showimportance):
             print("*"*self.NUMBER_OF_DASHES)
+
+        if(showimportance):
+            display(HTML("<h3>Feature Importance</h3>"))
             self.plot_feature_importance(model, features=features)
+            print("*"*self.NUMBER_OF_DASHES)
+        
+        return None
+
+        # END OF VISUALIZE DECISION TREE FUNCTION
     
     def prepruning_nodes_samples_split(self,
                                     X_train: pd.DataFrame,
@@ -328,18 +483,34 @@ class DT:
         return: dictionary containing the pre-pruned model and its performance metrics
         """
 
-        model_prepruning = self.tune_decision_tree(X_train=X_train,
+        tuning_results = self.tune_decision_tree_results(X_train=X_train,
                                                    y_train=y_train,
                                                    X_test=X_test,
                                                    y_test=y_test,
                                                    max_depth_v=max_depth_v,
                                                    max_leaf_nodes_v=max_leaf_nodes_v,
                                                    min_samples_split_v=min_samples_split_v,
-                                                   printall=printall,
+                                                   printall=False,
                                                    sortresultby=[sortresultby],
                                                    sortbyAscending=sortbyAscending)
         
-        model_prepruning = model_prepruning.fit(X=X_train,y=y_train) 
+        
+        if(printall):
+            display(HTML("<h3>Tuning Results - All Combinations</h3>"))
+            # Set display option to show all rows
+            pd.set_option('display.max_rows', None)
+            display(tuning_results['scores']) 
+            # Reset display option to default
+            pd.reset_option('display.max_rows')
+            print("-" * self.NUMBER_OF_DASHES)  
+
+            display(HTML("<h3>Tuning Results - Best Combination</h3>"))      
+            display(tuning_results['tuned_model_scores'])
+            print("-" * self.NUMBER_OF_DASHES)  
+            
+           
+
+        model_prepruning =  tuning_results['model'].fit(X=X_train,y=y_train) 
 
         features = list(X_train.columns)
 
@@ -355,25 +526,26 @@ class DT:
           
         if(printall): 
             display(HTML("<h3>Pre-pruning on Training Set</h3>"))
-            self.plot_confusion_matrix(model=model_prepruning,predictors=X_test,expected=y_test, title="Pre-pruning on Test Set")
+            self.plot_confusion_matrix(model=model_prepruning,predictors=X_train,expected=y_train, title="Pre-pruning on Test Set")
             display(model_prepruning_train_perf)
 
         model_prepruning_test_perf = self.model_performance_classification(model=model_prepruning,predictors=X_test,expected=y_test)
 
         if(printall):
-            display(HTML("<h3>Pre-pruning on Test Set</h3>"))
-            self.plot_confusion_matrix(model=model_prepruning,predictors= X_test,expected= y_test, title="Pre-pruning on Test Set")
+            display(HTML("<h3>Pre-pruning on Train Set</h3>"))
+            self.plot_confusion_matrix(model=model_prepruning,predictors= X_test,expected= y_test, title="Pre-pruning on Train Set")
             display(model_prepruning_test_perf)
 
+        
         return {
                 'model': model_prepruning,
                 'prepruning_train_perf': model_prepruning_train_perf, 
                 'prepruning_test_perf': model_prepruning_test_perf,
-                #Fix the tune_decision_tree to return these values
-                # 'model_default_perf' : model_default_perf,
-                # 'train_f1_scores': train_f1_scores,
-                # 'test_f1_scores': test_f1_scores,
-        }
+                'prepruning_scores_tuned': tuning_results['tuned_model_scores'],
+                'prepruning_scores_all': tuning_results['scores']
+                }
+
+        # END OF PRE-PRUNING FUNCTION
            
     def postpruning_cost_complexity(self,
                                    X_train: pd.DataFrame,
@@ -438,7 +610,7 @@ class DT:
             decisionTreeClassifiers.append(decisionTreeClassifier)
         if(printall):
             # Print the number of nodes in the last tree along with its ccp_alpha value
-            display(HTML("<b>Number of nodes in the last tree is {} with ccp_alpha {}</b>".format(decisionTreeClassifiers[-1].tree_.node_count, ccp_alphas[-1])))
+            display(HTML("<b>Number of nodes in the last tree is {} with ccp_alpha {}</b> ".format(decisionTreeClassifiers[-1].tree_.node_count, ccp_alphas[-1])))
 
         # Remove the last classifier and corresponding ccp_alpha value from the lists
         decisionTreeClassifiers = decisionTreeClassifiers[:-1]
@@ -467,6 +639,8 @@ class DT:
 
         # Adjust the layout of the subplots to avoid overlap
         fig.tight_layout()
+        fig.show()
+        sys.stdout.flush()
 
         # Initialize an empty list to store F1 scores for training set for each decision tree classifier
         train_f1_scores = []  
@@ -552,3 +726,5 @@ class DT:
                 'ccp_alphas': ccp_alphas, 
                 'impurities': impurities 
         }
+    
+        # END OF POST-PRUNING FUNCTION

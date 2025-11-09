@@ -2,11 +2,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
 import numpy as np
+import sys
 
 from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import f1_score, accuracy_score, recall_score, precision_score, confusion_matrix
-from IPython.display import display
+from IPython.display import display, HTML
 # To ignore unnecessary warnings
 import warnings
 warnings.filterwarnings("ignore")   
@@ -50,6 +51,8 @@ class EDA:
         )
         plt.legend(loc="upper left", bbox_to_anchor=(1, 1))
         plt.show()
+        sys.stdout.flush()
+        # END of barplot_stacked function
 
     # function to create labeled barplot
     def barplot_labeled(
@@ -103,6 +106,9 @@ class EDA:
             )  # annotate the percentage
 
         plt.show()  # show the plot
+        sys.stdout.flush()
+        # END of barplot_labeled function
+
 
     # function to plot a boxplot and a histogram along the same scale.
     def histogram_boxplot(
@@ -141,6 +147,10 @@ class EDA:
         ax_hist2.axvline(
             data[feature].median(), color="black", linestyle="-"
         )  # Add median to the histogram`
+        plt.show()
+        sys.stdout.flush()
+        # END of histogram_boxplot function
+
 
     # function to plot distribution of target variable for different classes of a predictor
     def distribution_plot_for_target(self, 
@@ -196,6 +206,9 @@ class EDA:
 
         plt.tight_layout()
         plt.show()
+        sys.stdout.flush()
+        # END of distribution_plot_for_target function
+
 
     # function to plot boxplots for all numerical features to detect outliers
     def boxplot_outliers(self, 
@@ -216,6 +229,7 @@ class EDA:
             plt.title(feature)
 
         plt.show()
+        # END of boxplot_outliers function
 
     # function to plot a boxplot and a histogram along the same scale.
     def histogram_boxplot_all(
@@ -241,6 +255,10 @@ class EDA:
             plt.subplot(1+int(len(features)/3), 3, i+1)    # assign a subplot in the main plot, 3 columns per row
             sns.histplot(data=data, x=feature, kde=kde, bins=bins)    # plot the histogram
 
+        plt.tight_layout()
+        plt.show()
+        sys.stdout.flush()
+        
         plt.figure(figsize=figsize)
 
         for i, feature in enumerate(features):
@@ -249,6 +267,8 @@ class EDA:
 
         plt.tight_layout()
         plt.show()
+        sys.stdout.flush()
+        # END of histogram_boxplot_all function
    
     # function to plot heatmap for all numerical features
     def heatmap_all(self, 
@@ -269,6 +289,10 @@ class EDA:
         sns.heatmap(
             data[features].corr(),annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral"
         )
+        plt.show()
+        sys.stdout.flush()
+        # END of heatmap_all function
+
     
     # function to plot pairplot for all numerical features
     def pairplot_all(self, 
@@ -296,15 +320,22 @@ class EDA:
                     if pd.api.types.is_numeric_dtype(data[col]) and data[col].nunique() > min_unique_values_for_pairplot
                 ]
         if hues is None:
+            display(HTML("<h3>Pairplot for all numerical features</h3>"))
             sns.pairplot(data, vars=features, diag_kind=diagonal_plot_kind)
+            plt.show()
+            sys.stdout.flush()
+            print("-" * self.NUMBER_OF_DASHES)
         else:
             for i, hue in enumerate(hues):
-                plt.subplot(1+int(len(features)/3), 3, i+1) # assign a subplot in the main plot, 3 columns per row
+                plt.subplot(1+int(len(features)), 3, i+1) 
                 #plotting the heatmap for correlation
-                print("Hue: " + hue)
+                display(HTML(f"<h3>Pairplot for all numerical features with Hue: {hue}</h3>"))
                 sns.pairplot(data, vars=features, hue=hue, diag_kind=diagonal_plot_kind)
+                plt.show()
+                sys.stdout.flush()
+                print("-" * self.NUMBER_OF_DASHES)
         
-        plt.show()
+        # END of pairplot_all function
     
     
     # function to plot distribution of target variable for different classes of a predictor
@@ -322,9 +353,13 @@ class EDA:
         predictor: 
         """
         for pred in predictors:
-            print("-" * 100)
-            print(f"Distribution plot_for {target} for predictor:{pred} ")
+            if pred == target:
+                continue
+            display(HTML(f"<h3>Distribution plot for {target} for predictor:{pred} </h>"))
             self.distribution_plot_for_target(data, pred, target, figsize)
+        print("-" * self.NUMBER_OF_DASHES)
+
+        # End of distribution_plot_for_target_all fuction
 
     # function to plot stacked bar chart for all predictors
     def barplot_stacked_all(self, 
@@ -342,6 +377,10 @@ class EDA:
         for pred in predictors:
             if pred == target:
                 continue
-            print("-" * self.NUMBER_OF_DASHES)
-            print(f"Stacked barplot for {target} for predictor:{pred} ")
+            
+            display(HTML(f"<h3>Stacked barplot for {target} for predictor: {pred} </h>"))
             self.barplot_stacked(data, pred, target)
+            print("-" * self.NUMBER_OF_DASHES)
+            
+        
+        # End of barplot_stacked_all function
