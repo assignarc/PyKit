@@ -109,6 +109,27 @@ class EDA:
         sys.stdout.flush()
         # END of barplot_labeled function
 
+    def boxplot_dependent_category(data: pd.DataFrame, 
+                                   dependent : str, 
+                                   independent : list[str],
+                                   figsize : tuple[float, float] =(12, 5), 
+                                   ) -> None:
+        """
+        data: dataframe \n
+        dependent: dependent variable \n
+        independent: list of independent variables \n
+        figsize: size of figure (default (12,5)) \n
+        return: None
+        """
+        for i, feature in enumerate(independent):
+            plt.figure(figsize=figsize)
+            plt.subplot(1+int(len(independent)/3), 3, i+1)
+            sns.boxplot(data=data, x=feature, y=dependent)
+        plt.tight_layout()
+        plt.show()
+        sys.stdout.flush()
+        # END of boxplot_dependent_category function
+
 
     # function to plot a boxplot and a histogram along the same scale.
     def histogram_boxplot(
@@ -123,7 +144,7 @@ class EDA:
         data: dataframe \n
         feature: dataframe column \n
         figsize: size of figure (default (12,7)) \n
-        kde: whether to the show 'Kernel Desity Estimate (KDE)' curve (default False) \n
+        kde: whether to the show 'Kernel Density Estimate (KDE)' curve (default False) \n
         bins: number of bins for histogram (default None) \n
         return: None
         """
@@ -359,7 +380,7 @@ class EDA:
             self.distribution_plot_for_target(data, pred, target, figsize)
         print("-" * self.NUMBER_OF_DASHES)
 
-        # End of distribution_plot_for_target_all fuction
+        # End of distribution_plot_for_target_all function
 
     # function to plot stacked bar chart for all predictors
     def barplot_stacked_all(self, 
