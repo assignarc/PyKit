@@ -5,7 +5,7 @@ import numpy as np
 
 # Assuming vkpykit is in the python path.
 # If not, you might need to adjust sys.path.
-from VKPyKit1.EDA import *
+from VKPyKit.EDA import *
 EDA = EDA()
 class TestEDAPairplotAll(unittest.TestCase):
 
