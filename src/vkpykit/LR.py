@@ -5,20 +5,18 @@ import numpy as np
 
 from sklearn import tree
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import  mean_absolute_error, mean_squared_error, r2_score
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 # to split the data into train and test sets
 from sklearn.model_selection import train_test_split
 # to build a linear regression model
 from sklearn.linear_model import LinearRegression
 
 from IPython.display import display, HTML
+import plotly.express as px
+import VKPy
 
 
-# To ignore unnecessary warnings
-import warnings
-warnings.filterwarnings("ignore")
-
-class LR:
+class LR(VKPy):
 
     def __init__(self):
         pass
@@ -26,6 +24,7 @@ class LR:
     """
     To plot simple LR visualizations
     """
+
     # function to compute MAPE
     def mape_score(self, targets, predictions):
         return np.mean(np.abs(targets - predictions) / targets) * 100
@@ -70,7 +69,8 @@ class LR:
         mae = mean_absolute_error(target, pred)  # to compute MAE
         mape = self.mape_score(target, pred)  # to compute MAPE
         r2 = r2_score(target, pred)  # to compute R-squared
-        adj_r2 = self.adj_r2_score(predictors, target, pred)  # to compute Adjusted R-squared
+        adj_r2 = self.adj_r2_score(predictors, target,
+                                   pred)  # to compute Adjusted R-squared
 
         # creating a dataframe of metrics
         df_perf = pd.DataFrame(

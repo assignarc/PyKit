@@ -10,23 +10,22 @@ from sklearn.metrics import f1_score, accuracy_score, recall_score, precision_sc
 from IPython.display import display, HTML
 # To ignore unnecessary warnings
 import warnings
-warnings.filterwarnings("ignore")   
+import VKPy
 
-class EDA:
+warnings.filterwarnings("ignore")
+
+
+class EDA(VKPy):
 
     def __init__(self):
         pass
 
-    RANDOM_STATE = 42
-    NUMBER_OF_DASHES = 100
-
     """
     To plot simple EDA visualizations
     """
+
     # function to plot stacked bar chart
-    def barplot_stacked(self, 
-                        data : pd.DataFrame, 
-                        predictor: str , 
+    def barplot_stacked(self, data: pd.DataFrame, predictor: str,
                         target: str) -> None:
         """
         Print the category counts and plot a stacked bar chart
@@ -37,17 +36,18 @@ class EDA:
         """
         count = data[predictor].nunique()
         sorter = data[target].value_counts().index[-1]
-        tab1 = pd.crosstab(data[predictor], data[target], margins=True).sort_values(
-            by=sorter, ascending=False
-        )
+        tab1 = pd.crosstab(data[predictor], data[target],
+                           margins=True).sort_values(by=sorter,
+                                                     ascending=False)
         print(tab1)
         print("-" * self.NUMBER_OF_DASHES)
-        tab = pd.crosstab(data[predictor], data[target], normalize="index").sort_values(
-            by=sorter, ascending=False
-        )
+        tab = pd.crosstab(data[predictor], data[target],
+                          normalize="index").sort_values(by=sorter,
+                                                         ascending=False)
         tab.plot(kind="bar", stacked=True, figsize=(count + 5, 6))
         plt.legend(
-            loc="lower left", frameon=False,
+            loc="lower left",
+            frameon=False,
         )
         plt.legend(loc="upper left", bbox_to_anchor=(1, 1))
         plt.show()
@@ -55,12 +55,11 @@ class EDA:
         # END of barplot_stacked function
 
     # function to create labeled barplot
-    def barplot_labeled(
-            self,
-            data: pd.DataFrame, 
-            feature: str, 
-            percentages: bool =False, 
-            category_levels : int =None):
+    def barplot_labeled(self,
+                        data: pd.DataFrame,
+                        feature: str,
+                        percentages: bool = False,
+                        category_levels: int = None):
         """
         Barplot with percentage at the top
 
@@ -83,12 +82,15 @@ class EDA:
             data=data,
             x=feature,
             palette="Paired",
-            order=data[feature].value_counts().index[:category_levels] if category_levels else None,
+            order=data[feature].value_counts().index[:category_levels]
+            if category_levels else None,
         )
 
         for p in ax.patches:
             if percentages == True:
-                label = "{:.1f}%".format(100 * p.get_height() / totalfeaturesvalues)  # percentage of each class of the category
+                label = "{:.1f}%".format(
+                    100 * p.get_height() / totalfeaturesvalues
+                )  # percentage of each class of the category
             else:
                 label = p.get_height()  # count of each level of the category
 
@@ -109,11 +111,12 @@ class EDA:
         sys.stdout.flush()
         # END of barplot_labeled function
 
-    def boxplot_dependent_category(data: pd.DataFrame, 
-                                   dependent : str, 
-                                   independent : list[str],
-                                   figsize : tuple[float, float] =(12, 5), 
-                                   ) -> None:
+    def boxplot_dependent_category(
+            data: pd.DataFrame,
+            dependent: str,
+            independent: list[str],
+            figsize: tuple[float, float] = (12, 5),
+    ) -> None:
         """
         data: dataframe \n
         dependent: dependent variable \n
@@ -123,22 +126,20 @@ class EDA:
         """
         for i, feature in enumerate(independent):
             plt.figure(figsize=figsize)
-            plt.subplot(1+int(len(independent)/3), 3, i+1)
+            plt.subplot(1 + int(len(independent) / 3), 3, i + 1)
             sns.boxplot(data=data, x=feature, y=dependent)
         plt.tight_layout()
         plt.show()
         sys.stdout.flush()
         # END of boxplot_dependent_category function
 
-
     # function to plot a boxplot and a histogram along the same scale.
-    def histogram_boxplot(
-            self,
-            data : pd.DataFrame, 
-            feature: str, 
-            figsize : tuple[float, float] =(12, 7), 
-            kde : bool = False, 
-            bins : int = None) -> None:
+    def histogram_boxplot(self,
+                          data: pd.DataFrame,
+                          feature: str,
+                          figsize: tuple[float, float] = (12, 7),
+                          kde: bool = False,
+                          bins: int = None) -> None:
         """
         Boxplot and histogram combined
         data: dataframe \n
@@ -158,29 +159,28 @@ class EDA:
             data=data, x=feature, ax=ax_box2, showmeans=True, color="violet"
         )  # boxplot will be created and a star will indicate the mean value of the column
         sns.histplot(
-            data=data, x=feature, kde=kde, ax=ax_hist2, bins=bins, palette="winter"
-        ) if bins else sns.histplot(
-            data=data, x=feature, kde=kde, ax=ax_hist2
-        )  # For histogram
-        ax_hist2.axvline(
-            data[feature].mean(), color="green", linestyle="--"
-        )  # Add mean to the histogram
-        ax_hist2.axvline(
-            data[feature].median(), color="black", linestyle="-"
-        )  # Add median to the histogram`
+            data=data,
+            x=feature,
+            kde=kde,
+            ax=ax_hist2,
+            bins=bins,
+            palette="winter") if bins else sns.histplot(
+                data=data, x=feature, kde=kde, ax=ax_hist2)  # For histogram
+        ax_hist2.axvline(data[feature].mean(), color="green",
+                         linestyle="--")  # Add mean to the histogram
+        ax_hist2.axvline(data[feature].median(), color="black",
+                         linestyle="-")  # Add median to the histogram`
         plt.show()
         sys.stdout.flush()
         # END of histogram_boxplot function
 
-
     # function to plot distribution of target variable for different classes of a predictor
-    def distribution_plot_for_target(self, 
-                                     data : pd.DataFrame, 
-                                     predictor : str, 
-                                     target : str,
-                                     figsize: tuple[float, float]= (12, 10)
-                                     ) -> None:
-
+    def distribution_plot_for_target(
+        self,
+        data: pd.DataFrame,
+        predictor: str,
+        target: str,
+        figsize: tuple[float, float] = (12, 10)) -> None:
         """
         data: dataframe \n
         predictor: Independent variable \n
@@ -192,7 +192,8 @@ class EDA:
 
         target_uniq = data[target].unique()
 
-        axs[0, 0].set_title("Distribution of target for target=" + str(target_uniq[0]))
+        axs[0, 0].set_title("Distribution of target for target=" +
+                            str(target_uniq[0]))
         sns.histplot(
             data=data[data[target] == target_uniq[0]],
             x=predictor,
@@ -202,7 +203,8 @@ class EDA:
             stat="density",
         )
 
-        axs[0, 1].set_title("Distribution of target for target=" + str(target_uniq[1]))
+        axs[0, 1].set_title("Distribution of target for target=" +
+                            str(target_uniq[1]))
         sns.histplot(
             data=data[data[target] == target_uniq[1]],
             x=predictor,
@@ -213,7 +215,11 @@ class EDA:
         )
 
         axs[1, 0].set_title("Boxplot w.r.t target")
-        sns.boxplot(data=data, x=target, y=predictor, ax=axs[1, 0], palette="gist_rainbow")
+        sns.boxplot(data=data,
+                    x=target,
+                    y=predictor,
+                    ax=axs[1, 0],
+                    palette="gist_rainbow")
 
         axs[1, 1].set_title("Boxplot (without outliers) w.r.t target")
         sns.boxplot(
@@ -230,10 +236,8 @@ class EDA:
         sys.stdout.flush()
         # END of distribution_plot_for_target function
 
-
     # function to plot boxplots for all numerical features to detect outliers
-    def boxplot_outliers(self, 
-                         data: pd.DataFrame):
+    def boxplot_outliers(self, data: pd.DataFrame):
         # outlier detection using boxplot
         """
         data: dataframe \n
@@ -244,7 +248,9 @@ class EDA:
         plt.figure(figsize=(15, 12))
 
         for i, feature in enumerate(features):
-            plt.subplot(1+int(len(features)/3), 3, i + 1) # assign a subplot in the main plot, 3 columns per row
+            plt.subplot(
+                1 + int(len(features) / 3), 3,
+                i + 1)  # assign a subplot in the main plot, 3 columns per row
             plt.boxplot(data[feature], whis=1.5)
             plt.tight_layout()
             plt.title(feature)
@@ -253,12 +259,11 @@ class EDA:
         # END of boxplot_outliers function
 
     # function to plot a boxplot and a histogram along the same scale.
-    def histogram_boxplot_all(
-            self,
-            data : pd.DataFrame, 
-            figsize : tuple[float, float] =(15, 10), 
-            bins : int = 10, 
-            kde : bool = False) -> None:
+    def histogram_boxplot_all(self,
+                              data: pd.DataFrame,
+                              figsize: tuple[float, float] = (15, 10),
+                              bins: int = 10,
+                              kde: bool = False) -> None:
         """
         Boxplot and histogram combined
         data: dataframe \n
@@ -273,29 +278,30 @@ class EDA:
         plt.figure(figsize=figsize)
 
         for i, feature in enumerate(features):
-            plt.subplot(1+int(len(features)/3), 3, i+1)    # assign a subplot in the main plot, 3 columns per row
-            sns.histplot(data=data, x=feature, kde=kde, bins=bins)    # plot the histogram
+            plt.subplot(
+                1 + int(len(features) / 3), 3,
+                i + 1)  # assign a subplot in the main plot, 3 columns per row
+            sns.histplot(data=data, x=feature, kde=kde,
+                         bins=bins)  # plot the histogram
 
         plt.tight_layout()
         plt.show()
         sys.stdout.flush()
-        
+
         plt.figure(figsize=figsize)
 
         for i, feature in enumerate(features):
-            plt.subplot(1+int(len(features)/3), 3, i+1)    # assign a subplot in the main plot
-            sns.boxplot(data=data, x=feature)    # plot the histogram
+            plt.subplot(1 + int(len(features) / 3), 3,
+                        i + 1)  # assign a subplot in the main plot
+            sns.boxplot(data=data, x=feature)  # plot the histogram
 
         plt.tight_layout()
         plt.show()
         sys.stdout.flush()
         # END of histogram_boxplot_all function
-   
+
     # function to plot heatmap for all numerical features
-    def heatmap_all(self, 
-                    data : pd.DataFrame,
-                    features : list = None
-                    ) -> None:
+    def heatmap_all(self, data: pd.DataFrame, features: list = None) -> None:
         """
         Plot heatmap for all numerical features\n
         data: dataframe \n
@@ -307,22 +313,23 @@ class EDA:
             features = data.select_dtypes(include=['number']).columns.tolist()
 
         # plotting the heatmap for correlation
-        sns.heatmap(
-            data[features].corr(),annot=True, vmin=-1, vmax=1, fmt=".2f", cmap="Spectral"
-        )
+        sns.heatmap(data[features].corr(),
+                    annot=True,
+                    vmin=-1,
+                    vmax=1,
+                    fmt=".2f",
+                    cmap="Spectral")
         plt.show()
         sys.stdout.flush()
         # END of heatmap_all function
 
-    
     # function to plot pairplot for all numerical features
-    def pairplot_all(self, 
-                    data : pd.DataFrame,
-                    features : list[str] = None,
-                    hues: list[str] = None,
-                    min_unique_values_for_pairplot : int = 4,
-                    diagonal_plot_kind: str = "auto"
-                    ) -> None:
+    def pairplot_all(self,
+                     data: pd.DataFrame,
+                     features: list[str] = None,
+                     hues: list[str] = None,
+                     min_unique_values_for_pairplot: int = 4,
+                     diagonal_plot_kind: str = "auto") -> None:
         """
         Plot heatmap for all numerical features\n
         data: dataframe \n
@@ -333,13 +340,14 @@ class EDA:
         return: None
         """
         # defining the size of the plot
-        plt.figure(figsize=(12, 7)) 
+        plt.figure(figsize=(12, 7))
 
         if features is None:
             features = [
-                    col for col in data.columns 
-                    if pd.api.types.is_numeric_dtype(data[col]) and data[col].nunique() > min_unique_values_for_pairplot
-                ]
+                col for col in data.columns
+                if pd.api.types.is_numeric_dtype(data[col])
+                and data[col].nunique() > min_unique_values_for_pairplot
+            ]
         if hues is None:
             display(HTML("<h3>Pairplot for all numerical features</h3>"))
             sns.pairplot(data, vars=features, diag_kind=diagonal_plot_kind)
@@ -348,25 +356,29 @@ class EDA:
             print("-" * self.NUMBER_OF_DASHES)
         else:
             for i, hue in enumerate(hues):
-                plt.subplot(1+int(len(features)), 3, i+1) 
+                plt.subplot(1 + int(len(features)), 3, i + 1)
                 #plotting the heatmap for correlation
-                display(HTML(f"<h3>Pairplot for all numerical features with Hue: {hue}</h3>"))
-                sns.pairplot(data, vars=features, hue=hue, diag_kind=diagonal_plot_kind)
+                display(
+                    HTML(
+                        f"<h3>Pairplot for all numerical features with Hue: {hue}</h3>"
+                    ))
+                sns.pairplot(data,
+                             vars=features,
+                             hue=hue,
+                             diag_kind=diagonal_plot_kind)
                 plt.show()
                 sys.stdout.flush()
                 print("-" * self.NUMBER_OF_DASHES)
-        
-        # END of pairplot_all function
-    
-    
-    # function to plot distribution of target variable for different classes of a predictor
-    def distribution_plot_for_target_all(self, 
-                                     data : pd.DataFrame, 
-                                     predictors : list[str], 
-                                     target : str,
-                                     figsize: tuple[float, float]= (12, 10)
-                                     ) -> None:
 
+        # END of pairplot_all function
+
+    # function to plot distribution of target variable for different classes of a predictor
+    def distribution_plot_for_target_all(
+        self,
+        data: pd.DataFrame,
+        predictors: list[str],
+        target: str,
+        figsize: tuple[float, float] = (12, 10)) -> None:
         """
         data: dataframe \n
         predictor: List of Independent variables \n
@@ -376,19 +388,18 @@ class EDA:
         for pred in predictors:
             if pred == target:
                 continue
-            display(HTML(f"<h3>Distribution plot for {target} for predictor:{pred} </h>"))
+            display(
+                HTML(
+                    f"<h3>Distribution plot for {target} for predictor:{pred} </h>"
+                ))
             self.distribution_plot_for_target(data, pred, target, figsize)
         print("-" * self.NUMBER_OF_DASHES)
 
         # End of distribution_plot_for_target_all function
 
     # function to plot stacked bar chart for all predictors
-    def barplot_stacked_all(self, 
-                        data : pd.DataFrame, 
-                        predictors: list[str],
-                        target: str
-                        ) -> None:
-
+    def barplot_stacked_all(self, data: pd.DataFrame, predictors: list[str],
+                            target: str) -> None:
         """
         data: dataframe \n
         predictor: List of Independent variables \n
@@ -398,10 +409,12 @@ class EDA:
         for pred in predictors:
             if pred == target:
                 continue
-            
-            display(HTML(f"<h3>Stacked barplot for {target} for predictor: {pred} </h>"))
+
+            display(
+                HTML(
+                    f"<h3>Stacked barplot for {target} for predictor: {pred} </h>"
+                ))
             self.barplot_stacked(data, pred, target)
             print("-" * self.NUMBER_OF_DASHES)
-            
-        
+
         # End of barplot_stacked_all function
