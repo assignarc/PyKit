@@ -1,5 +1,5 @@
 dist
-src/VKPyKit.edgg*
+src/VKPyKit.egg-info
 src/VKPyKit/__pycache__/
 src/VKPyKit/*.pyc
 tests/__pycache__/
