@@ -5,7 +5,7 @@ setup(
     version='0.1.2',
     package_dir={'': 'src'},
     packages=find_packages('src'),
-    description='Packaged functions for ML and Data Science tasks.',
+    description='Packaged functions for Machine Learning and Data Science tasks.',
     author='Vishal Khapre',
     author_email='assignarc@gmail.com',
     install_requires=[
