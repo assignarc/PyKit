@@ -4,17 +4,18 @@ import pandas as pd
 import numpy as np
 import sys
 
-from sklearn import tree
+from sklearn import tree, metrics
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import f1_score, accuracy_score, recall_score, precision_score, confusion_matrix
 from IPython.display import display, HTML
 import plotly.express as px
-import VKPy
+import warnings
+warnings.filterwarnings("ignore")
 
 
-class DT(VKPy):
+class DT():
 
-    def __init__(self):
+    def __init__(self): 
+        super().__init__()
         pass
 
     RANDOM_STATE = 42
@@ -41,17 +42,17 @@ class DT(VKPy):
         """
 
         # predicting using the independent variables
-        pred = model.predict(predictors)
+        predictions = model.predict(predictors)
 
-        acc = accuracy_score(expected, pred)  # to compute Accuracy
-        recall = recall_score(expected, pred)  # to compute Recall
-        precision = precision_score(expected, pred)  # to compute Precision
-        f1 = f1_score(expected, pred)  # to compute F1-score
+        accuracy = metrics.accuracy_score(expected, predictions)  # to compute Accuracy
+        recall = metrics.recall_score(expected, predictions)  # to compute Recall
+        precision = metrics.precision_score(expected, predictions)  # to compute Precision
+        f1 = metrics.f1_score(expected, predictions)  # to compute F1-score
 
         # creating a dataframe of metrics
         df_perf = pd.DataFrame(
             {
-                "Accuracy": acc,
+                "Accuracy": accuracy,
                 "Recall": recall,
                 "Precision": precision,
                 "F1": f1,
@@ -85,7 +86,7 @@ class DT(VKPy):
         predicted = model.predict(predictors)
 
         # Compute the confusion matrix comparing the true target values with the predicted values
-        conf_matrix = confusion_matrix(expected, predicted)
+        conf_matrix = metrics.confusion_matrix(expected, predicted)
 
         # Create labels for each cell in the confusion matrix with both count and percentage
         labels = np.asarray([[
@@ -321,14 +322,14 @@ class DT(VKPy):
                     y_test_pred = estimator.predict(X_test)
 
                     # calculate F1 scores for training and test sets
-                    train_f1_score = f1_score(y_train, y_train_pred)
-                    test_f1_score = f1_score(y_test, y_test_pred)
+                    train_f1_score = metrics.f1_score(y_train, y_train_pred)
+                    test_f1_score = metrics.f1_score(y_test, y_test_pred)
                     # calculate the absolute difference between training and test F1 scores
                     scoreF1Difference = abs(train_f1_score - test_f1_score)
 
                     # Calculate recall scores for training and test sets
-                    train_recall_score = recall_score(y_train, y_train_pred)
-                    test_recall_score = recall_score(y_test, y_test_pred)
+                    train_recall_score = metrics.recall_score(y_train, y_train_pred)
+                    test_recall_score = metrics.recall_score(y_test, y_test_pred)
                     # Calculate the absolute difference between training and test recall scores
                     scoreRecallDifference = abs(train_recall_score -
                                                 test_recall_score)
@@ -339,18 +340,15 @@ class DT(VKPy):
                         expected=y_test,
                         title="DecisionTreeClassifier",
                         printall=False)
+                        
                     score = pd.DataFrame({
                         'TreeDepth': [max_depth],
                         'LeafNodes': [max_leaf_nodes],
                         'SampleSplit': [min_samples_split],
-                        'Accuracy':
-                        test_performance['Accuracy'].values,
-                        'Recall':
-                        test_performance['Recall'].values,
-                        'Precision':
-                        test_performance['Precision'].values,
-                        'F1':
-                        test_performance['F1'].values,
+                        'Accuracy': test_performance['Accuracy'].values,
+                        'Recall': test_performance['Recall'].values,
+                        'Precision':test_performance['Precision'].values,
+                        'F1':   test_performance['F1'].values,
                         'F1Difference': [scoreF1Difference],
                         'RecallDifference': [scoreRecallDifference]
                     })

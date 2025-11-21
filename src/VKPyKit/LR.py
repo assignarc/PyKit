@@ -13,14 +13,17 @@ from sklearn.linear_model import LinearRegression
 
 from IPython.display import display, HTML
 import plotly.express as px
-import VKPy
+import warnings
+warnings.filterwarnings("ignore")
 
 
-class LR(VKPy):
+class LR():
 
     def __init__(self):
         pass
-
+    
+    RANDOM_STATE = 42
+    NUMBER_OF_DASHES = 100
     """
     To plot simple LR visualizations
     """

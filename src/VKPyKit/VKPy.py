@@ -8,7 +8,6 @@ class VKPy:
     RANDOM_STATE = 42
     NUMBER_OF_DASHES = 100
     
-    @classmethod
-    def get_info(cls):
-        print(f"{cls.RANDOM_STATE}")
-        print(f"{cls.NUMBER_OF_DASHES}")
+
+    def __str__(self):
+        return (f"VKPy : RANDOM_STATE = {cls.RANDOM_STATE} | DASHES ={cls.NUMBER_OF_DASHES}")

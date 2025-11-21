@@ -10,16 +10,16 @@ from sklearn.metrics import f1_score, accuracy_score, recall_score, precision_sc
 from IPython.display import display, HTML
 # To ignore unnecessary warnings
 import warnings
-import VKPy
-
 warnings.filterwarnings("ignore")
 
 
-class EDA(VKPy):
+class EDA():
 
     def __init__(self):
         pass
-
+    
+    RANDOM_STATE = 42
+    NUMBER_OF_DASHES = 100
     """
     To plot simple EDA visualizations
     """
