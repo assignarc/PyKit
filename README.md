@@ -1,4 +1,14 @@
-# VKPyKit
+# VKPyKit [![PyPi license](https://img.shields.io/pypi/l/VKPyKit.svg)](https://pypi.python.org/pypi/VKPyKit)
+
+[![PyPi status](https://img.shields.io/pypi/status/VKPyKit.svg)](https://pypi.python.org/pypi/VKPyKit) 
+[![PyPi version](https://img.shields.io/pypi/v/VKPyKit.svg)](https://pypi.python.org/pypi/VKPyKit) 
+[![PyPi python version](https://img.shields.io/pypi/pyversions/VKPyKit.svg)](https://pypi.python.org/pypi/VKPyKit) 
+[![PyPi downloads](https://img.shields.io/pypi/dm/VKPyKit.svg)](https://pypi.python.org/pypi/VKPyKit) 
+[![PyPi downloads](https://img.shields.io/pypi/dw/VKPyKit.svg)](https://pypi.python.org/pypi/VKPyKit) 
+[![PyPi downloads](https://img.shields.io/pypi/dd/VKPyKit.svg)](https://pypi.python.org/pypi/VKPyKit) 
+
+## GitHub ![GitHub release](https://img.shields.io/github/tag/assignarc/VKPyKit.svg) ![GitHub release](https://img.shields.io/github/release/assignarc/VKPyKit.svg)
+
 
 This package contains several functions used for Exploratory Data Analysis, Linear Regression, Decision Trees. Instead of writing those everytime, just wanted to put them in a package and reuse myself. 
 

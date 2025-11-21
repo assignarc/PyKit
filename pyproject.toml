@@ -31,7 +31,7 @@ name = "VKPyKit" # REQUIRED, is the only field that cannot be marked as dynamic.
 # https://packaging.python.org/guides/single-sourcing-package-version/
 #version = "0.0.1" # REQUIRED, although can be dynamic
 #dynamic = ["version"]
-version = "0.3.014"
+version = "0.3.017"
 
 
 # This is a one-line description or tagline of what your project does. This
@@ -72,14 +72,12 @@ keywords = ["Python", "Machine Learning", "data science", "utilities"]
 # This should be your name or the name of the organization who originally
 # authored the project, and a valid email address corresponding to the name
 # listed.
-authors = [{ name = "Vishal Khapre", email = "assignarc@gmail.com" }]
+authors = [{ name = "Vishal Khapre" }]
 
 # This should be your name or the names of the organization who currently
 # maintains the project, and a valid email address corresponding to the name
 # listed.
-maintainers = [
-  { name = "Vishal Khapre", email = "assignarc@gmail.com" },
-]
+maintainers = [{ name = "Vishal Khapre"}]
 
 # Classifiers help users find your project by categorizing it.
 #
@@ -89,7 +87,7 @@ classifiers = [
   #   3 - Alpha
   #   4 - Beta
   #   5 - Production/Stable
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 4 - Beta",
 
   # Indicate who your project is intended for
   "Intended Audience :: Developers",
