@@ -5,3 +5,4 @@ src/VKPyKit/*.pyc
 tests/__pycache__/
 tests/*.pyc
 .vscode/
+MyPy
