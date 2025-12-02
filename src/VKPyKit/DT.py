@@ -30,7 +30,7 @@ class DT():
     @staticmethod
     # defining a function to compute different metrics to check performance of a classification model built using sklearn
     def model_performance_classification(
-            model: DecisionTreeClassifier,
+            model,
             predictors: pd.DataFrame,
             expected: pd.Series,
             printall: bool = False,
@@ -73,7 +73,7 @@ class DT():
         # END OF MODEL PERFORMANCE CLASSIFICATION FUNCTION
     @staticmethod
     def plot_confusion_matrix(
-                              model: DecisionTreeClassifier,
+                              model,
                               predictors: pd.DataFrame,
                               expected: pd.Series,
                               title: str = "DecisionTreeClassifier") -> None:
@@ -202,11 +202,9 @@ class DT():
                                 'TreeDepth': [max_depth],
                                 'LeafNodes': [max_leaf_nodes],
                                 'SampleSplit': [min_samples_split],
-                                'Accuracy':
-                                test_performance['Accuracy'].values,
+                                'Accuracy':test_performance['Accuracy'].values,
                                 'Recall': test_performance['Recall'].values,
-                                'Precision':
-                                test_performance['Precision'].values,
+                                'Precision':test_performance['Precision'].values,
                                 'F1': test_performance['F1'].values,
                                 'F1Difference': [scoreF1Difference],
                                 'RecallDifference': [scoreRecallDifference]

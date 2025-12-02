@@ -6,4 +6,4 @@ rm -r dist
 
 ./.venv/bin/python -m twine upload --repository testpypi dist/* 
 
-./.venv/bin/python -m twine upload --repository pypi dist/*
+# ./.venv/bin/python -m twine upload --repository pypi dist/*
