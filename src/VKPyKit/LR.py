@@ -24,23 +24,24 @@ class LR():
     
     RANDOM_STATE = 42
     NUMBER_OF_DASHES = 100
+
+   
     """
     To plot simple LR visualizations
     """
-
-    # function to compute MAPE
-    def mape_score(self, targets, predictions):
+    @staticmethod
+    def mape_score(targets, predictions):
         return np.mean(np.abs(targets - predictions) / targets) * 100
 
-    # function to compute adjusted R-squared
-    def adj_r2_score(self, predictors, targets, predictions):
+    @staticmethod
+    def adj_r2_score(predictors, targets, predictions):
         r2 = r2_score(targets, predictions)
         n = predictors.shape[0]
         k = predictors.shape[1]
         return 1 - ((1 - r2) * (n - 1) / (n - k - 1))
 
-    # function to compute different metrics to check performance of a regression model
-    def model_performance_regression(self, model, predictors, target):
+    @staticmethod
+    def model_performance_regression(model, predictors, target):
         """
         Function to compute different metrics to check regression model performance
 
@@ -70,9 +71,9 @@ class LR():
 
         rmse = np.sqrt(mean_squared_error(target, pred))  # to compute RMSE
         mae = mean_absolute_error(target, pred)  # to compute MAE
-        mape = self.mape_score(target, pred)  # to compute MAPE
+        mape = LR.mape_score(target, pred)  # to compute MAPE
         r2 = r2_score(target, pred)  # to compute R-squared
-        adj_r2 = self.adj_r2_score(predictors, target,
+        adj_r2 = LR.adj_r2_score(predictors, target,
                                    pred)  # to compute Adjusted R-squared
 
         # creating a dataframe of metrics

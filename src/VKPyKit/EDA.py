@@ -21,14 +21,6 @@ class EDA():
     RANDOM_STATE = 42
     NUMBER_OF_DASHES = 100
 
-    @property
-    def RANDOM_STATE(self):
-        return self.RANDOM_STATE
-    
-    @property
-    def NUMBER_OF_DASHES(self):
-        return self.NUMBER_OF_DASHES
-    
     """
     To plot simple EDA visualizations
     """
@@ -382,7 +374,7 @@ class EDA():
                              diag_kind=diagonal_plot_kind)
                 plt.show()
                 sys.stdout.flush()
-                print("-" * self.NUMBER_OF_DASHES)
+                print("-" * EDA.NUMBER_OF_DASHES)
 
         # END of pairplot_all function
     
@@ -406,8 +398,8 @@ class EDA():
                 HTML(
                     f"<h3>Distribution plot for {target} for predictor:{pred} </h>"
                 ))
-            self.distribution_plot_for_target(data, pred, target, figsize)
-        print("-" * self.NUMBER_OF_DASHES)
+            EDA.distribution_plot_for_target(data, pred, target, figsize)
+        print("-" * EDA.NUMBER_OF_DASHES)
 
         # End of distribution_plot_for_target_all function
 
@@ -429,7 +421,7 @@ class EDA():
                 HTML(
                     f"<h3>Stacked barplot for {target} for predictor: {pred} </h>"
                 ))
-            self.barplot_stacked(data, pred, target)
-            print("-" * self.NUMBER_OF_DASHES)
+            EDA.barplot_stacked(data, pred, target)
+            print("-" * EDA.NUMBER_OF_DASHES)
 
         # End of barplot_stacked_all function

@@ -17,17 +17,19 @@ class DT():
     def __init__(self): 
         super().__init__()
         pass
+    
 
     RANDOM_STATE = 42
     NUMBER_OF_DASHES = 100
+
     """
     Decision Tree Classifier related visualizations
     To plot the confusion_matrix with percentages
     """
 
+    @staticmethod
     # defining a function to compute different metrics to check performance of a classification model built using sklearn
     def model_performance_classification(
-            self,
             model: DecisionTreeClassifier,
             predictors: pd.DataFrame,
             expected: pd.Series,
@@ -69,8 +71,8 @@ class DT():
         return df_perf
 
         # END OF MODEL PERFORMANCE CLASSIFICATION FUNCTION
-
-    def plot_confusion_matrix(self,
+    @staticmethod
+    def plot_confusion_matrix(
                               model: DecisionTreeClassifier,
                               predictors: pd.DataFrame,
                               expected: pd.Series,
@@ -109,9 +111,8 @@ class DT():
         plt.show()
         sys.stdout.flush()
         # END OF PLOT CONFUSION MATRIX FUNCTION
-
+    @staticmethod
     def tune_decision_tree(
-            self,
             X_train: pd.DataFrame,
             y_train: pd.Series,
             X_test: pd.DataFrame,
@@ -165,7 +166,7 @@ class DT():
                         max_depth=max_depth,
                         max_leaf_nodes=max_leaf_nodes,
                         min_samples_split=min_samples_split,
-                        random_state=self.RANDOM_STATE)
+                        random_state=DT.RANDOM_STATE) 
 
                     # fit the model to the training data
                     estimator.fit(X_train, y_train)
@@ -187,7 +188,7 @@ class DT():
                     scoreRecallDifference = abs(train_recall_score -
                                                 test_recall_score)
 
-                    test_performance = self.model_performance_classification(
+                    test_performance = DT.model_performance_classification(
                         model=estimator,
                         predictors=X_test,
                         expected=y_test,
@@ -230,9 +231,9 @@ class DT():
             'F1Difference': [best_scoreF1Difference],
             'RecallDifference': [best_scoreRecallDifference]
         })
-        print("-" * self.NUMBER_OF_DASHES)
+        print("-" * DT.NUMBER_OF_DASHES)
         display(best_results)
-        print("-" * self.NUMBER_OF_DASHES)
+        print("-" * DT.NUMBER_OF_DASHES)
         # Set display option to show all rows
 
         if printall:
@@ -245,9 +246,8 @@ class DT():
         return best_estimator
 
         # END OF TUNE DECISION TREE FUNCTION
-
+    @staticmethod
     def tune_decision_tree_results(
-            self,
             X_train: pd.DataFrame,
             y_train: pd.Series,
             X_test: pd.DataFrame,
@@ -312,7 +312,7 @@ class DT():
                         max_depth=max_depth,
                         max_leaf_nodes=max_leaf_nodes,
                         min_samples_split=min_samples_split,
-                        random_state=self.RANDOM_STATE)
+                        random_state=DT.RANDOM_STATE)
 
                     # fit the model to the training data
                     estimator.fit(X_train, y_train)
@@ -334,7 +334,7 @@ class DT():
                     scoreRecallDifference = abs(train_recall_score -
                                                 test_recall_score)
 
-                    test_performance = self.model_performance_classification(
+                    test_performance = DT.model_performance_classification(
                         model=estimator,
                         predictors=X_test,
                         expected=y_test,
@@ -373,9 +373,9 @@ class DT():
         })
 
         if (printall):
-            print("-" * self.NUMBER_OF_DASHES)
+            print("-" * DT.NUMBER_OF_DASHES)
             display(tuned_model_scores)
-            print("-" * self.NUMBER_OF_DASHES)
+            print("-" * DT.NUMBER_OF_DASHES)
             # Set display option to show all rows
             pd.set_option('display.max_rows', None)
             display(scores)
@@ -388,9 +388,8 @@ class DT():
         }
 
         # END OF TUNE DECISION TREE FUNCTION
-
-    def plot_feature_importance(self,
-                                model: DecisionTreeClassifier,
+    @staticmethod
+    def plot_feature_importance(model: DecisionTreeClassifier,
                                 features: list,
                                 figsize: tuple[float, float] = (10, 6),
                                 numberoftopfeatures: int = None,
@@ -427,9 +426,8 @@ class DT():
         sys.stdout.flush()
 
         # END OF PLOT FEATURE IMPORTANCE FUNCTION
-
-    def visualize_decision_tree(self,
-                                model: DecisionTreeClassifier,
+    @staticmethod
+    def visualize_decision_tree(model: DecisionTreeClassifier,
                                 features: list,
                                 classes: list = None,
                                 figsize: tuple[float, float] = (20, 10),
@@ -483,19 +481,18 @@ class DT():
                     show_weights=
                     True  # specify whether or not to show the weights associated with the model
                 ))
-            print("*" * self.NUMBER_OF_DASHES)
+            print("*" * DT.NUMBER_OF_DASHES)
 
         if (showimportance):
             display(HTML("<h3>Feature Importance</h3>"))
-            self.plot_feature_importance(model, features=features)
-            print("*" * self.NUMBER_OF_DASHES)
+            DT.plot_feature_importance(model, features=features)
+            print("*" * DT.NUMBER_OF_DASHES)
 
         return None
 
         # END OF VISUALIZE DECISION TREE FUNCTION
-
-    def prepruning_nodes_samples_split(self,
-                                       X_train: pd.DataFrame,
+    @staticmethod
+    def prepruning_nodes_samples_split(X_train: pd.DataFrame,
                                        y_train: pd.Series,
                                        X_test: pd.DataFrame,
                                        y_test: pd.Series,
@@ -519,7 +516,7 @@ class DT():
         return: dictionary containing the pre-pruned model and its performance metrics
         """
 
-        tuning_results = self.tune_decision_tree_results(
+        tuning_results = DT.tune_decision_tree_results(
             X_train=X_train,
             y_train=y_train,
             X_test=X_test,
@@ -538,41 +535,41 @@ class DT():
             display(tuning_results['scores'])
             # Reset display option to default
             pd.reset_option('display.max_rows')
-            print("-" * self.NUMBER_OF_DASHES)
+            print("-" * DT.NUMBER_OF_DASHES)
 
             display(HTML("<h3>Tuning Results - Best Combination</h3>"))
             display(tuning_results['tuned_model_scores'])
-            print("-" * self.NUMBER_OF_DASHES)
+            print("-" * DT.NUMBER_OF_DASHES)
 
         model_prepruning = tuning_results['model'].fit(X=X_train, y=y_train)
 
         features = list(X_train.columns)
 
         if (printall):
-            self.visualize_decision_tree(model=model_prepruning,
+            DT.visualize_decision_tree(model=model_prepruning,
                                          features=features,
                                          classes=None,
                                          figsize=(20, 20),
                                          showtext=True,
                                          showimportance=True)
 
-        model_prepruning_train_perf = self.model_performance_classification(
+        model_prepruning_train_perf = DT.model_performance_classification(
             model=model_prepruning, predictors=X_train, expected=y_train)
 
         if (printall):
             display(HTML("<h3>Pre-pruning on Training Set</h3>"))
-            self.plot_confusion_matrix(model=model_prepruning,
+            DT.plot_confusion_matrix(model=model_prepruning,
                                        predictors=X_train,
                                        expected=y_train,
                                        title="Pre-pruning on Test Set")
             display(model_prepruning_train_perf)
 
-        model_prepruning_test_perf = self.model_performance_classification(
+        model_prepruning_test_perf = DT.model_performance_classification(
             model=model_prepruning, predictors=X_test, expected=y_test)
 
         if (printall):
             display(HTML("<h3>Pre-pruning on Train Set</h3>"))
-            self.plot_confusion_matrix(model=model_prepruning,
+            DT.plot_confusion_matrix(model=model_prepruning,
                                        predictors=X_test,
                                        expected=y_test,
                                        title="Pre-pruning on Train Set")
@@ -587,9 +584,8 @@ class DT():
         }
 
         # END OF PRE-PRUNING FUNCTION
-
+    @staticmethod
     def postpruning_cost_complexity(
-        self,
         X_train: pd.DataFrame,
         y_train: pd.Series,
         X_test: pd.DataFrame,
@@ -608,7 +604,7 @@ class DT():
         """
         # Create an instance of the decision tree model
         decisionTreeClassifier = DecisionTreeClassifier(
-            random_state=self.RANDOM_STATE)
+            random_state=DT.RANDOM_STATE)
 
         # Compute the cost complexity pruning path for the model using the training data
         path = decisionTreeClassifier.cost_complexity_pruning_path(
@@ -654,7 +650,7 @@ class DT():
         for ccp_alpha in ccp_alphas:
             # Create an instance of the DecisionTreeClassifier
             decisionTreeClassifier = DecisionTreeClassifier(
-                ccp_alpha=ccp_alpha, random_state=self.RANDOM_STATE)
+                ccp_alpha=ccp_alpha, random_state=DT.RANDOM_STATE)
 
             # Fit the classifier to the training data
             decisionTreeClassifier.fit(X_train, y_train)
@@ -766,24 +762,24 @@ class DT():
 
         if (printall):
             display(model_postpruning)
-            self.plot_confusion_matrix(model=model_postpruning,
+            DT.plot_confusion_matrix(model=model_postpruning,
                                        predictors=X_train,
                                        expected=y_train,
                                        title="Post-pruning on Training Set")
 
-        model_postpruning_train_perf = self.model_performance_classification(
+        model_postpruning_train_perf = DT.model_performance_classification(
             model=model_postpruning,
             predictors=X_train,
             expected=y_train,
             title="Post-pruning on Training Set")
         if (printall):
             display(model_postpruning_train_perf)
-            self.plot_confusion_matrix(model=model_postpruning,
+            DT.plot_confusion_matrix(model=model_postpruning,
                                        predictors=X_test,
                                        expected=y_test,
                                        title="Post-pruning on Test Set")
 
-        model_postpruning_test_perf = self.model_performance_classification(
+        model_postpruning_test_perf = DT.model_performance_classification(
             model=model_postpruning,
             predictors=X_test,
             expected=y_test,
@@ -792,7 +788,7 @@ class DT():
         if (printall):
             display(model_postpruning_test_perf)
         if (printall):
-            self.visualize_decision_tree(model=model_postpruning,
+            DT.visualize_decision_tree(model=model_postpruning,
                                          features=X_train.columns,
                                          classes=None,
                                          figsize=(20, 20),

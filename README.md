@@ -85,17 +85,12 @@ All dependencies will be automatically installed with the package.
 ## 🎯 Quick Start
 
 ```python
-from VKPyKit.EDA import EDA
-from VKPyKit.DT import DT
-from VKPyKit.LR import LR
-
-# Initialize modules
-eda = EDA()
-dt = DT()
-lr = LR()
+from VKPyKit.EDA import *
+from VKPyKit.DT import *
+from VKPyKit.LR import *
 
 # Quick EDA visualization
-eda.histogram_boxplot_all(
+EDA.histogram_boxplot_all(
     data=df,
     figsize=(15, 10),
     bins=10,
@@ -103,7 +98,7 @@ eda.histogram_boxplot_all(
 )
 
 # Train and evaluate a Decision Tree
-dt.model_performance_classification(
+DT.model_performance_classification(
     model=my_dt_classifier,
     X=X_test,
     y=y_test,
@@ -112,7 +107,7 @@ dt.model_performance_classification(
 )
 
 # Build a Linear Regression model
-lr.linear_regression_model(
+LR.linear_regression_model(
     data=df,
     predictors=['feature1', 'feature2', 'feature3'],
     target='target_variable',
@@ -130,16 +125,14 @@ lr.linear_regression_model(
 Visualize the distribution of all numerical features in your dataset:
 
 ```python
-from VKPyKit.EDA import EDA
+from VKPyKit.EDA import *
 import pandas as pd
-
-eda = EDA()
 
 # Load your data
 df = pd.read_csv('your_data.csv')
 
 # Generate histogram and boxplot for all numerical columns
-eda.histogram_boxplot_all(
+EDA.histogram_boxplot_all(
     data=df,
     figsize=(15, 10),
     bins=10,
@@ -153,14 +146,14 @@ Visualize categorical variable distributions against a target:
 
 ```python
 # Single stacked bar plot
-eda.barplot_stacked(
+EDA.barplot_stacked(
     data=df,
     predictor='category_column',
     target='target_column'
 )
 
 # Multiple stacked bar plots
-eda.barplot_stacked_all(
+EDA.barplot_stacked_all(
     data=df,
     predictors=['cat_col1', 'cat_col2', 'cat_col3'],
     target='target_column'
@@ -171,7 +164,7 @@ eda.barplot_stacked_all(
 
 ```python
 # Analyze how a feature distributes across target classes
-eda.distribution_plot_for_target(
+EDA.distribution_plot_for_target(
     data=df,
     predictor='numerical_feature',
     target='target_column',
@@ -179,7 +172,7 @@ eda.distribution_plot_for_target(
 )
 
 # Analyze multiple features
-eda.distribution_plot_for_target_all(
+EDA.distribution_plot_for_target_all(
     data=df,
     predictors=['feature1', 'feature2', 'feature3'],
     target='target_column',
@@ -191,13 +184,13 @@ eda.distribution_plot_for_target_all(
 
 ```python
 # Generate correlation heatmap
-eda.heatmap_all(
+EDA.heatmap_all(
     data=df,
     features=['feature1', 'feature2', 'feature3']  # Optional: specify features
 )
 
 # Generate pairplot for feature relationships
-eda.pairplot_all(
+EDA.pairplot_all(
     data=df,
     features=['feature1', 'feature2', 'feature3'],
     hues=['target_column'],
@@ -210,7 +203,7 @@ eda.pairplot_all(
 
 ```python
 # Visualize outliers across all numerical features
-eda.boxplot_outliers(data=df)
+EDA.boxplot_outliers(data=df)
 ```
 
 ### Decision Trees (DT)
@@ -218,11 +211,9 @@ eda.boxplot_outliers(data=df)
 #### Model Performance Evaluation
 
 ```python
-from VKPyKit.DT import DT
+from VKPyKit.DT import *
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
-
-dt = DT()
 
 # Prepare your data
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
@@ -232,7 +223,7 @@ model = DecisionTreeClassifier(random_state=42)
 model.fit(X_train, y_train)
 
 # Evaluate performance
-dt.model_performance_classification(
+DT.model_performance_classification(
     model=model,
     X=X_test,
     y=y_test,
@@ -245,7 +236,7 @@ dt.model_performance_classification(
 
 ```python
 # Plot confusion matrix
-dt.plot_confusion_matrix(
+DT.plot_confusion_matrix(
     model=model,
     X=X_test,
     y=y_test,
@@ -257,7 +248,7 @@ dt.plot_confusion_matrix(
 
 ```python
 # Automated hyperparameter tuning with grid search
-best_params, results_df = dt.tune_decision_tree(
+best_params, results_df = DT.tune_decision_tree(
     X_train=X_train,
     y_train=y_train,
     X_test=X_test,
@@ -278,12 +269,10 @@ print(f"Best parameters: {best_params}")
 #### Build and Evaluate a Linear Regression Model
 
 ```python
-from VKPyKit.LR import LR
-
-lr = LR()
+from VKPyKit.LR import *
 
 # Train and evaluate linear regression
-lr.linear_regression_model(
+LR.linear_regression_model(
     data=df,
     predictors=['feature1', 'feature2', 'feature3'],
     target='target_variable',
