@@ -391,7 +391,9 @@ class DT():
                                 features: list,
                                 figsize: tuple[float, float] = (10, 6),
                                 numberoftopfeatures: int = None,
-                                title: str = '') -> None:
+                                title: str = '',
+                                ignoreZeroImportance: bool = False,
+                                ) -> None:
         """
         Plot feature importance for a given model and feature names
 
@@ -409,6 +411,9 @@ class DT():
 
         if numberoftopfeatures:
             df_importance.head(numberoftopfeatures, inplace=True)
+
+        if ignoreZeroImportance:
+            df_importance = df_importance[df_importance['Importance'] > 0]
 
         display(df_importance)
 
