@@ -7,7 +7,7 @@ setup(
     packages=find_packages('src'),
     description='Packaged functions for Machine Learning and Data Science tasks.',
     author='Vishal Khapre',
-    author_email='assignarc@gmail.com',
+    url='https://github.com/assignarc/VKPyKit',
     install_requires=[
         'pandas',
         'numpy',

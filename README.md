@@ -29,6 +29,7 @@ VKPyKit is a production-ready Python package designed to streamline common Machi
 - **Exploratory Data Analysis (EDA)**: Comprehensive visualization and statistical analysis tools
 - **Decision Trees (DT)**: Model training, evaluation, and hyperparameter tuning
 - **Linear Regression (LR)**: Linear model building and performance assessment
+- **Machine Learning Models (MLM)**: General classification model performance evaluation and visualization
 
 Instead of repeatedly writing the same boilerplate code across projects, VKPyKit packages these commonly-used functions into a reusable, well-tested library.
 
@@ -59,6 +60,13 @@ Instead of repeatedly writing the same boilerplate code across projects, VKPyKit
 - **Residual Analysis**: Automated residual plotting and diagnostics
 - **Model Comparison**: Compare multiple regression models
 
+### 🤖 Machine Learning Models (MLM)
+
+- **Model Performance Metrics**: Comprehensive classification performance reporting for any sklearn classifier
+- **Confusion Matrices**: Visual confusion matrix generation with percentages
+- **Model Evaluation**: Accuracy, Precision, Recall, and F1-Score metrics
+- **Universal Compatibility**: Works with any scikit-learn classification model
+
 ## 🚀 Installation
 
 ### Using pip (Recommended)
@@ -88,6 +96,7 @@ All dependencies will be automatically installed with the package.
 from VKPyKit.EDA import *
 from VKPyKit.DT import *
 from VKPyKit.LR import *
+from VKPyKit.MLM import *
 
 # Quick EDA visualization
 EDA.histogram_boxplot_all(
@@ -104,6 +113,15 @@ DT.model_performance_classification(
     y=y_test,
     printall=True,
     title='Customer Churn Model'
+)
+
+# Evaluate any classification model
+MLM.model_performance_classification(
+    model=my_classifier,
+    predictors=X_test,
+    expected=y_test,
+    printall=True,
+    title='My Classification Model'
 )
 
 # Build a Linear Regression model
@@ -281,6 +299,46 @@ LR.linear_regression_model(
 )
 ```
 
+### Machine Learning Models (MLM)
+
+#### Evaluate Any Classification Model
+
+The MLM module works with any scikit-learn classifier (Random Forest, SVM, Logistic Regression, etc.):
+
+```python
+from VKPyKit.MLM import *
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+
+# Prepare your data
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Train any classifier
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Evaluate performance with comprehensive metrics
+MLM.model_performance_classification(
+    model=model,
+    predictors=X_test,
+    expected=y_test,
+    printall=True,
+    title='Random Forest Classifier'
+)
+```
+
+#### Confusion Matrix for Any Classifier
+
+```python
+# Plot confusion matrix with percentages
+MLM.plot_confusion_matrix(
+    model=model,
+    predictors=X_test,
+    expected=y_test,
+    title='Random Forest - Confusion Matrix'
+)
+```
+
 ## 🛠️ API Reference
 
 ### EDA Class
@@ -311,6 +369,13 @@ LR.linear_regression_model(
 | Method | Description |
 |--------|-------------|
 | `linear_regression_model()` | Build and evaluate linear regression models |
+
+### MLM Class
+
+| Method | Description |
+|--------|-------------|
+| `model_performance_classification()` | Comprehensive performance metrics for any classifier |
+| `plot_confusion_matrix()` | Visualize confusion matrix with percentages |
 
 ## 🤝 Contributing
 
