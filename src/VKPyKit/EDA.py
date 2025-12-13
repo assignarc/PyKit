@@ -89,9 +89,8 @@ class EDA():
 
         for p in ax.patches:
             if percentages == True:
-                label = "{:.1f}%".format(
-                    100 * p.get_height() / totalfeaturesvalues
-                )  # percentage of each class of the category
+                label = str(p.get_height()) + "(" +"{:.1f}%".format(100 * p.get_height() / totalfeaturesvalues) + ")"  
+                # percentage of each class of the category
             else:
                 label = p.get_height()  # count of each level of the category
 
@@ -425,3 +424,88 @@ class EDA():
             print("-" * EDA.NUMBER_OF_DASHES)
 
         # End of barplot_stacked_all function
+
+    @staticmethod
+    # function to plot labeled bar chart for all predictors
+    def barplot_labeled_all(data: pd.DataFrame, predictors: list[str],
+                            target: str) -> None:
+        """
+        data: dataframe \n
+        predictor: List of Independent variables \n
+        target: Target variable \n  
+        predictor: 
+        """
+        for pred in predictors:
+            if pred == target:
+                continue
+
+            display(
+                HTML(
+                    f"<h3>Labeled barplot for {target} for predictor: {pred} </h>"
+                ))
+            EDA.barplot_labeled(data, pred, target)
+            print("-" * EDA.NUMBER_OF_DASHES)
+
+        # End of barplot_labeled_all function
+    
+    @staticmethod
+    # function to plot all numerical features against target variable
+    def pivot_table_all(data: pd.DataFrame,
+                        target: str,
+                        predictors: list[str] = None,
+                        stats: list[str] = ["min", "max", "mean", "median", "std", "count"],
+                        figsize: tuple[int, int] = (12, 10),
+                        chart_type: str = None,
+                        printall: bool = True,
+                        ) -> dict[str, pd.DataFrame]:
+        """
+        data: dataframe \n
+        predictors: List of Independent variables \n
+        target: Target / dependent variable \n  
+        stats: List of statistics to be calculated \n
+        """
+        dict_pivot = {}
+        
+        if predictors is None:
+            predictors = data.select_dtypes(include=['number']).columns.tolist()
+
+        for pred in predictors:
+            if pred == target:
+                continue
+
+            if not pd.api.types.is_numeric_dtype(data[pred]):
+                continue
+
+            dict_pivot[pred] = data.pivot_table(index=target, values=pred, aggfunc=stats)
+
+        
+        if printall: 
+            print("-" * EDA.NUMBER_OF_DASHES)
+            display(HTML("<h4>Pivot table for all numerical features</h3>"))
+            for pred in dict_pivot:
+                display(HTML(f"<h4>Pivot table for {target} for predictor: {pred} </h4>"))
+                display(dict_pivot[pred])
+                if chart_type is not None:
+                    dict_pivot[pred].drop('count', axis=1).T.plot(kind=chart_type, figsize=figsize)
+                    plt.title(f'Pivot chart for {pred}')
+                    plt.xlabel(target)
+                    plt.ylabel(pred)
+                    plt.xticks(rotation=45)
+                    plt.legend(title=pred)
+                    plt.tight_layout()
+                    plt.show()
+
+                dict_pivot[pred].drop('count', axis=1).plot.box(figsize=figsize)
+                plt.title(f'Boxplot for {pred}')
+                plt.xlabel(target)
+                plt.ylabel(pred)
+                plt.xticks(rotation=45)
+                plt.legend(title=pred)
+                plt.tight_layout()
+                plt.show()
+                print("-" * EDA.NUMBER_OF_DASHES)
+               
+
+        return dict_pivot
+
+        # End of pivot_table_all function   
